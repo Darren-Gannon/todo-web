@@ -1,6 +1,39 @@
-<div class="container">
-    <div class="row">
-        <p>app-page works!</p>
-    </div>
-</div>
-<router-outlet></router-outlet>
+<mat-drawer-container autosize style="min-height: 100vh;">
+    <mat-toolbar color="primary">
+        <div class="container">
+            <div class="row" style="align-items: center; display: flex;">
+                <button mat-icon-button (click)="drawer.toggle()">
+                    <mat-icon>menu</mat-icon>
+                </button>
+                <a routerLink="/"
+                    style="align-items: center; display: flex; color: unset; text-decoration: unset; gap: 1vw;">
+                    <img src="assets/favicon.ico" alt="logo">
+                    <h1 style="display: inline;">TODO</h1>
+                </a>
+                <span style="flex-grow: 1;"></span>
+                <button mat-icon-button [matMenuTriggerFor]="menu">
+                    <mat-icon>menu</mat-icon>
+                </button>
+                
+                <mat-menu #menu="matMenu">
+                    <button mat-menu-item>
+                        <mat-icon color="primary">account_circle</mat-icon>
+                        <span>Account</span>
+                    </button>
+                    <hr>
+                    <button mat-menu-item routerLink="/">
+                        <mat-icon color="warn">logout</mat-icon>
+                        <span>Sign Out</span>
+                    </button>
+                </mat-menu>
+            </div>
+        </div>
+    </mat-toolbar>
+
+    <mat-drawer #drawer mode="over" class="col-xs-11 col-sm-8 col-md-3">
+
+    </mat-drawer>
+
+    <router-outlet></router-outlet>
+
+</mat-drawer-container>
