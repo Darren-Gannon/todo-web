@@ -1,0 +1,32 @@
+#columns-container {
+    display: flex;
+    gap: 1vw;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    padding: 1vh 1vw;
+    border-radius: 5px;
+    min-width: 20vw;
+    max-width: 20vw;
+    width: 20vw;
+
+    &:nth-child(even) {
+        background-color: #efefef;
+    }
+}
+
+#tasks-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+}
+
+#create-button-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+}

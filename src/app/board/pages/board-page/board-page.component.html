@@ -1,0 +1,86 @@
+<div class="container">
+    <div class="row">
+        <p>
+            <ng-container *ngIf="board$ | async as board; else loadingTmpl">
+                <mat-card>
+                    <div class="container" style="display: flex; gap: 1vw; align-items: center;">
+                        <ng-container *ngIf="{ editing: false } as vm">
+                            <ng-container *ngIf="!vm.editing; else editBoardTitleTmpl">
+                                <h2 style="display: inline;">{{ board.title }}</h2>
+                                <button mat-icon-button color="primary" (click)="vm.editing = true">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                            </ng-container>
+                            <ng-template #editBoardTitleTmpl>
+                                <form [formGroup]="boardForm" (submit)="vm.editing = false; boardForm.valid && updateBoard_.next(boardForm.value)">
+                                    <mat-form-field>
+                                        <mat-label>Title</mat-label>
+                                        <input formControlName="title" matInput type="text">
+                                        <button type="button" matSuffix mat-icon-button color="warn" (click)="vm.editing = false; boardForm.patchValue(board)">
+                                            <mat-icon>cancel</mat-icon>
+                                        </button>
+                                        <button type="submit" matSuffix mat-icon-button color="primary">
+                                            <mat-icon>done</mat-icon>
+                                        </button>
+                                    </mat-form-field>
+                                </form>
+                            </ng-template>
+                        </ng-container>
+                    </div>
+                </mat-card>
+            </ng-container>
+        </p>
+        <p id="columns-container">
+            <ng-container *ngIf="states$ | async as states; else loadingTmpl">
+                <ng-container  *ngFor="let state of states; let odd = odd">
+                    <div class="column">
+                        <mat-toolbar [color]="odd ? 'primary' : 'accent'">
+                            <div class="clickable" style="padding-left: 1vw; padding-right: 1vw;" (click)="openState_.next({ state })">
+                                <h3>{{ state.title }}</h3>
+                            </div>
+                        </mat-toolbar>
+                        <p id="create-button-container">
+                            <button mat-raised-button [color]="odd ? 'accent' : 'primary'" (click)="openTask_.next({ states })">Create</button>
+                        </p>
+                        <div id="tasks-container">
+                            <ng-container *ngIf="state.tasks$ | async as tasks; else loadingTmpl">
+                                <ng-container *ngFor="let task of tasks">
+
+                                    <mat-card style="margin-top: 1vh;" mat-ripple (click)="openTask_.next({ task, states })">
+                                        <mat-card-header>
+                                            <mat-card-title>
+                                                <div>
+                                                    <h4 style="margin: 0;">{{ task.title }}</h4>
+                                                </div>
+                                            </mat-card-title>
+                                        </mat-card-header>
+                                        <mat-card-content>
+                                            <div>
+                                                <span>{{ task.description }}</span>
+
+                                                <span class="gray-text">{{ task.createdAt | date : 'shortDate' }}</span>
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                    </div>
+                </ng-container>
+                <div class="column">
+                    <mat-toolbar [color]="states.length % 2 == 0 ? 'primary' : 'accent'">
+                        <div style="display: grid; grid-template-columns: 1fr; width: 100%;">
+                            <button mat-raised-button [color]="states.length % 2 == 1 ? 'primary' : 'accent'" (click)="openState_.next({})">Create</button>
+                        </div>
+                    </mat-toolbar>
+                </div>
+            </ng-container>
+        </p>
+    </div>
+</div>
+<br>
+
+<ng-template #loadingTmpl>
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</ng-template>

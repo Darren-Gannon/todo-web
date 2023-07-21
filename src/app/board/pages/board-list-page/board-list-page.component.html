@@ -1,0 +1,21 @@
+<div class="container">
+    <div class="row">
+        <p id="board-container" class="row" style="align-items: stretch; display: flex; flex-wrap: wrap;">
+            <ng-container *ngIf="boards$ | async as boards; else loadingTmpl">
+                <button mat-raised-button color="accent" class="board col-xs-12 col-md-4 col-lg-3" routerLink="new">Create</button>
+                <div class="board col-xs-12 col-md-4 col-lg-3" *ngFor="let board of boards">
+                    <a [routerLink]="board.id" style="color: unset; text-decoration: unset;">
+                        <mat-card matRipple class="row">
+                            <div class="col-xs-12" style="display: flex; flex-direction: row;">
+                                <h2 style="display: inline-block;">{{ board.title }}</h2>
+                            </div>
+                        </mat-card>
+                    </a>
+                </div>
+            </ng-container>
+        </p>
+    </div>
+</div>
+<ng-template #loadingTmpl>
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+</ng-template>

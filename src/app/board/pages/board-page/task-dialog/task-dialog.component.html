@@ -1,0 +1,24 @@
+<div style="height: 99%; display: grid; grid-template-columns: 1fr; grid-template-rows: repeat(2, max-content) auto max-content;">
+    <mat-toolbar color="primary">{{ taskForm.controls.title.value }}</mat-toolbar>
+    <form id="task-form" (ngSubmit)="taskForm.valid && dialogRef.close({ task: taskForm.value })" [formGroup]="taskForm">
+        <mat-form-field>
+            <mat-label>Title</mat-label>
+            <input matInput type="text" formControlName="title">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="stateId">
+              <mat-option *ngFor="let state of data.states" [value]="state.id"> {{ state.title }} </mat-option>
+            </mat-select>
+          </mat-form-field>
+        <mat-form-field>
+            <mat-label>Description</mat-label>
+            <textarea matInput type="text" formControlName="description"></textarea>
+        </mat-form-field>
+    </form>
+    <span></span>
+    <div style="padding-left: 1vw; padding-right: 1vw; display: grid; grid-template-columns: auto max-content; gap: 1vw">
+        <span></span>
+        <button mat-raised-button color="primary" type="submit" (click)="taskForm.valid && dialogRef.close(taskForm.value)">Submit</button>
+    </div>
+</div>

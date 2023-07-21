@@ -1,4 +1,5 @@
-<mat-drawer-container autosize style="min-height: 100vh;">
+<mat-drawer-container autosize>
+    
     <mat-toolbar color="primary">
         <div class="container">
             <div class="row" style="align-items: center; display: flex;">
@@ -16,10 +17,10 @@
                 </button>
                 
                 <mat-menu #menu="matMenu">
-                    <button mat-menu-item>
+                    <a style="text-decoration: none; color: unset;" mat-menu-item routerLink="/app/account">
                         <mat-icon color="primary">account_circle</mat-icon>
                         <span>Account</span>
-                    </button>
+                    </a>
                     <hr>
                     <button mat-menu-item routerLink="/">
                         <mat-icon color="warn">logout</mat-icon>
@@ -33,7 +34,7 @@
     <mat-drawer #drawer mode="over" class="col-xs-11 col-sm-8 col-md-3">
 
     </mat-drawer>
-
+    
     <router-outlet></router-outlet>
 
 </mat-drawer-container>

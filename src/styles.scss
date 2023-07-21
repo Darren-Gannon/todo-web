@@ -37,3 +37,19 @@ $todo-web-theme: mat.define-light-theme((
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 @import './bootstrap/css/bootstrap.css';
+
+.light-gray-text {
+  color: #eeeeee;
+}
+
+.gray-text {
+  color: #cccccc;
+}
+
+.dark-gray-text {
+  color: #888888;
+}
+
+.clickable {
+  cursor: pointer;
+}

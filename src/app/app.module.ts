@@ -13,13 +13,17 @@ import { IndexPageComponent } from './pages/index-page/index-page.component';
 import { AppPageComponent } from './pages/app-page/app-page.component';
 import { HomePageComponent } from './pages/home-page/home-page.component';
 import { ApiModule } from '../api';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { AccountPageComponent } from './pages/account-page/account-page.component';
+import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
     AppComponent,
     IndexPageComponent,
     AppPageComponent,
-    HomePageComponent
+    HomePageComponent,
+    AccountPageComponent,
   ],
   imports: [
     BrowserModule,
@@ -32,7 +36,10 @@ import { ApiModule } from '../api';
     MatSidenavModule,
     MatMenuModule,
   ],
-  providers: [],
+  providers: [
+    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
+    { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { panelClass: ['col-xs-10', 'col-sm-8', 'col-md-6'], height: '90vh' } },
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
