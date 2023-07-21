@@ -13,7 +13,7 @@ export class TaskDialogComponent implements OnInit {
 
   public readonly taskForm = this.fb.group({
     title: this.fb.control('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] }),
-    description: this.fb.control('', { nonNullable: true, validators: [Validators.required] }),
+    description: this.fb.control(''),
     stateId: this.fb.control('', { nonNullable: true, validators: [Validators.required] }),
   });
 
