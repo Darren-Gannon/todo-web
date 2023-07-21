@@ -1,15 +1,17 @@
 <div class="container">
     <div class="row">
         <ng-container *ngIf="authService.user$ | async as user">
-            <mat-card>
-                <mat-card-header>
-                    <div mat-card-avatar style="background-image: url('{{ user.picture }}'); background-size: cover;"></div>
-                    <mat-card-title>{{ user.name }}</mat-card-title>
-                    <mat-card-subtitle>{{ user.email }}</mat-card-subtitle>
-                </mat-card-header>
-                <mat-card-content>
-                </mat-card-content>
-            </mat-card>
+            <p>
+                <mat-card>
+                    <mat-card-header>
+                        <div mat-card-avatar style="background-image: url('{{ user.picture }}'); background-size: cover;"></div>
+                        <mat-card-title>{{ user.name }}</mat-card-title>
+                        <mat-card-subtitle>{{ user.email }}</mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                    </mat-card-content>
+                </mat-card>
+            </p>
         </ng-container>
     </div>
 </div>
