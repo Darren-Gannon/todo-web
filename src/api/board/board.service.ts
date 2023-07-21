@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, map, Subscription } from 'rxjs';
 import { Board } from './board';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class BoardService {
@@ -25,9 +26,8 @@ export class BoardService {
     );
   }
 
-  boardCounter = Object.keys(this.boards).length;
   create(board: Pick<Board, 'title'>): Observable<Board> {
-    const id = `${ ++this.boardCounter }`;
+    const id = uuid();
     this.boards[id] = {
       ...board,
       id,

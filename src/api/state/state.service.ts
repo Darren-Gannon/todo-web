@@ -2,17 +2,7 @@ import { Injectable } from '@angular/core';
 import { State } from './state';
 import { Observable, map, BehaviorSubject, share, Subscription } from 'rxjs';
 import { Board } from '../board';
-
-const TASKS: State[] = [
-  {
-    id: '1',
-    title: 'To Do',
-  },
-  {
-    id: '2',
-    title: 'Done',
-  },
-];
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class StateService {
@@ -32,9 +22,8 @@ export class StateService {
     );
   }
 
-  statesCounter = Object.values(this.states).map(statesList => Object.values(statesList)).reduce((total, curr) => total + curr.length, 0);
   create(boardId: Board['id'], state: Pick<State, 'title'>): Observable<State> {
-    const id = `${ ++this.statesCounter }`;
+    const id = uuid();
     if(!this.states[boardId])
       this.states[boardId] = {};
     this.states[boardId][id] = {

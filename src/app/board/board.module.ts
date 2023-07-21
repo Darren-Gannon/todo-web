@@ -18,6 +18,7 @@ import { BoardListPageComponent } from './pages/board-list-page/board-list-page.
 import { BoardPageComponent } from './pages/board-page/board-page.component';
 import { TaskDialogComponent } from './pages/board-page/task-dialog/task-dialog.component';
 import { StateDialogComponent } from './pages/board-page/state-dialog/state-dialog.component';
+import { BoardSettingsPageComponent } from './pages/board-settings-page/board-settings-page.component';
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import { StateDialogComponent } from './pages/board-page/state-dialog/state-dial
     BoardListPageComponent,
     BoardPageComponent,
     TaskDialogComponent,
-    StateDialogComponent
+    StateDialogComponent,
+    BoardSettingsPageComponent
   ],
   imports: [
     CommonModule,
