@@ -18,6 +18,7 @@ import { AccountPageComponent } from './pages/account-page/account-page.componen
 import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { AuthModule } from '@auth0/auth0-angular';
 import { MatCardModule } from '@angular/material/card';
+import { MatListModule } from '@angular/material/list';
 
 @NgModule({
   declarations: [
@@ -38,6 +39,7 @@ import { MatCardModule } from '@angular/material/card';
     MatSidenavModule,
     MatMenuModule,
     MatCardModule,
+    MatListModule,
     AuthModule.forRoot({
       domain: 'cortex-todo.us.auth0.com',
       clientId: 'empJeIxteS3FnsHr4958Kl5nHQmPxSrx',

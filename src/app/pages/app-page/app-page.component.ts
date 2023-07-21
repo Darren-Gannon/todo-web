@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
+import { BoardService } from '../../../api';
 
 @Component({
   selector: 'app-app-page',
@@ -10,5 +11,6 @@ export class AppPageComponent {
 
   constructor(
     public readonly authService: AuthService,
+    public readonly boardService: BoardService,
   ) { }
 }
