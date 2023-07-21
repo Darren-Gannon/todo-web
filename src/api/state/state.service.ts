@@ -32,7 +32,7 @@ export class StateService {
     );
   }
 
-  statesCounter = 0;
+  statesCounter = Object.values(this.states).map(statesList => Object.values(statesList)).reduce((total, curr) => total + curr.length, 0);
   create(boardId: Board['id'], state: Pick<State, 'title'>): Observable<State> {
     const id = `${ ++this.statesCounter }`;
     if(!this.states[boardId])

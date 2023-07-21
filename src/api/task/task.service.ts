@@ -21,7 +21,7 @@ export class TaskService {
     );
   }
 
-  tasksCounter = 0;
+  tasksCounter = Object.values(this.tasks).map(tasksList => Object.values(tasksList)).reduce((total, curr) => total + curr.length, 0);
   create(boardId: Board['id'], task: Pick<Task, 'title' | 'description' | 'stateId'>): Observable<Task> {
     const id = `${ ++this.tasksCounter }`;
     if(!this.tasks[boardId])

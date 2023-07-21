@@ -34,7 +34,7 @@
     <mat-drawer #drawer mode="over" class="col-xs-11 col-sm-8 col-md-3">
         <ng-container *ngIf="boardService.find() | async as boards">
             <mat-nav-list>
-                <a mat-list-item [routerLink]="board.id" *ngFor="let board of boards">{{ board.title }}</a>
+                <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board', board.id]" *ngFor="let board of boards">{{ board.title }}</a>
             </mat-nav-list>
         </ng-container>
     </mat-drawer>

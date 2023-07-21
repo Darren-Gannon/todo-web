@@ -25,7 +25,7 @@ export class BoardService {
     );
   }
 
-  boardCounter = 0;
+  boardCounter = Object.keys(this.boards).length;
   create(board: Pick<Board, 'title'>): Observable<Board> {
     const id = `${ ++this.boardCounter }`;
     this.boards[id] = {

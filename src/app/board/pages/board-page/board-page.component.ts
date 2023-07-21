@@ -60,7 +60,6 @@ export class BoardPageComponent implements OnInit, OnDestroy {
       ]),
     )),
   ]).pipe(
-    tap(val => console.log(val)),
     switchMap(([boardId, state]) => {
       const [original, update] = state;
       if(!update) return EMPTY;
