@@ -35,6 +35,7 @@
         <ng-container *ngIf="boardService.find() | async as boards">
             <mat-nav-list>
                 <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board', board.id]" *ngFor="let board of boards">{{ board.title }}</a>
+                <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board/new']">Create</a>
             </mat-nav-list>
         </ng-container>
     </mat-drawer>
