@@ -1,0 +1,10 @@
+<div class="container">
+    <div class="row">
+        <p>
+            <ng-container *ngIf="board$ | async as board">
+                <hr>
+                <button mat-stroked-button color="warn" (click)="deleteBoard(board)">Delete Board</button>
+            </ng-container>
+        </p>
+    </div>
+</div>
