@@ -1,31 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, map, BehaviorSubject, share } from 'rxjs';
+import { Observable, of, map, BehaviorSubject, share, Subscription } from 'rxjs';
 import { Task } from './task';
 import { Board } from '../board';
-
-// const TASKS: Task[] = [
-//   {
-//     id: '1',
-//     createdAt: new Date().toISOString(),
-//     description: 'Desc',
-//     title: 'Title',
-//     stateId: '1',
-//   },
-//   {
-//     id: '1',
-//     createdAt: new Date().toISOString(),
-//     description: 'Desc',
-//     title: 'Title 2',
-//     stateId: '1',
-//   },
-// ];
 
 @Injectable()
 export class TaskService {
 
-  private tasks: { [id: Board['id']]: {[id: Task['id']]: Task} } = {
-  };
+  private tasks: { [id: Board['id']]: {[id: Task['id']]: Task} } = JSON.parse(localStorage.getItem('TASK_STORAGE') ?? '{}');
   private tasksSubject_ = new BehaviorSubject(this.tasks);
+  private tasksSub: Subscription = this.tasksSubject_.subscribe(tasks => {
+    localStorage.setItem('TASK_STORAGE', JSON.stringify(tasks))
+  });
 
   constructor() { }
 

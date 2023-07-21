@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { BehaviorSubject, Observable, map, Subscription } from 'rxjs';
 import { Board } from './board';
 
 @Injectable()
 export class BoardService {
 
-  private boards: { [id: Board['id']]: Board } = {
-  };
+  private boards: { [id: Board['id']]: Board } = JSON.parse(localStorage.getItem('BOARDS_STORAGE') ?? '{}');
   private boardsSubject_ = new BehaviorSubject(this.boards);
+  private boardsSub = this.boardsSubject_.subscribe(boards => {
+    localStorage.setItem('BOARDS_STORAGE', JSON.stringify(boards))
+  })
 
   constructor() { }
 
@@ -23,7 +25,7 @@ export class BoardService {
     );
   }
 
-  boardCounter = 1;
+  boardCounter = 0;
   create(board: Pick<Board, 'title'>): Observable<Board> {
     const id = `${ ++this.boardCounter }`;
     this.boards[id] = {

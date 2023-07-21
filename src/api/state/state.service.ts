@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { State } from './state';
-import { Observable, map, BehaviorSubject, share } from 'rxjs';
+import { Observable, map, BehaviorSubject, share, Subscription } from 'rxjs';
 import { Board } from '../board';
 
 const TASKS: State[] = [
@@ -19,9 +19,11 @@ export class StateService {
 
   constructor() { }
 
-  private states: { [id: Board['id']]: {[id: State['id']]: State} } = {
-  };
+  private states: { [id: Board['id']]: {[id: State['id']]: State} } = JSON.parse(localStorage.getItem('STATES_STORAGE') ?? '{}');
   private statesSubject_ = new BehaviorSubject(this.states);
+  private statesSub = this.statesSubject_.subscribe(states => {
+    localStorage.setItem('STATES_STORAGE', JSON.stringify(states))
+  })
 
   find(boardId: Board['id']): Observable<State[]> {
     return this.statesSubject_.pipe(
@@ -30,7 +32,7 @@ export class StateService {
     );
   }
 
-  statesCounter = 2;
+  statesCounter = 0;
   create(boardId: Board['id'], state: Pick<State, 'title'>): Observable<State> {
     const id = `${ ++this.statesCounter }`;
     if(!this.states[boardId])
