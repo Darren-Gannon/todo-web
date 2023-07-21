@@ -22,7 +22,7 @@
                         <span>Account</span>
                     </a>
                     <hr>
-                    <button mat-menu-item routerLink="/">
+                    <button mat-menu-item (click)="authService.logout()">
                         <mat-icon color="warn">logout</mat-icon>
                         <span>Sign Out</span>
                     </button>

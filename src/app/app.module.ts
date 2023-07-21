@@ -16,6 +16,8 @@ import { ApiModule } from '../api';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { AccountPageComponent } from './pages/account-page/account-page.component';
 import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
+import { AuthModule } from '@auth0/auth0-angular';
+import { MatCardModule } from '@angular/material/card';
 
 @NgModule({
   declarations: [
@@ -35,6 +37,14 @@ import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
     MatIconModule,
     MatSidenavModule,
     MatMenuModule,
+    MatCardModule,
+    AuthModule.forRoot({
+      domain: 'cortex-todo.us.auth0.com',
+      clientId: 'empJeIxteS3FnsHr4958Kl5nHQmPxSrx',
+      authorizationParams: {
+        redirect_uri: window.location.origin,
+      }
+    }),
   ],
   providers: [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },

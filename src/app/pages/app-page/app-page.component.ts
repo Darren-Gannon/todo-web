@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AuthService } from '@auth0/auth0-angular';
 
 @Component({
   selector: 'app-app-page',
@@ -7,4 +8,7 @@ import { Component } from '@angular/core';
 })
 export class AppPageComponent {
 
+  constructor(
+    public readonly authService: AuthService,
+  ) { }
 }

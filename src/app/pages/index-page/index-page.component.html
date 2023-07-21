@@ -6,7 +6,7 @@
                 <h1 style="display: inline;">TODO</h1>
             </a>
             <span style="flex-grow: 1;"></span>
-            <button mat-raised-button color="accent" class="col-xs-1" routerLink="app">Sign In</button>
+            <button mat-raised-button color="accent" class="col-xs-1" (click)="authService.loginWithRedirect()">Sign In</button>
         </div>
     </div>
 </mat-toolbar>
