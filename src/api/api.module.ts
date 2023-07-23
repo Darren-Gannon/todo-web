@@ -9,6 +9,8 @@ import { StoreModule } from '@ngrx/store';
 import { BoardsReducer } from './board/ngrx/board.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { BoardEffects } from './board/ngrx/board.effects';
+import { StatesEffects } from './state/ngrx/state.effects';
+import { StatesReducer } from './state/ngrx/state.reducer';
 
 @NgModule({
   declarations: [],
@@ -16,7 +18,8 @@ import { BoardEffects } from './board/ngrx/board.effects';
     CommonModule,
     HttpClientModule,
     StoreModule.forFeature('boards', BoardsReducer),
-    EffectsModule.forFeature(BoardEffects)
+    StoreModule.forFeature('states', StatesReducer),
+    EffectsModule.forFeature(BoardEffects, StatesEffects),
   ],
   providers: [
     BoardService,

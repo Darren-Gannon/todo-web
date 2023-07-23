@@ -1,13 +1,11 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map, share, tap } from 'rxjs';
-import { Board } from './board';
-import { v4 as uuid } from 'uuid';
 import { HttpClient } from '@angular/common/http';
-import { Config } from '../config';
-import { Store } from '@ngrx/store';
-import * as BoardActions from './ngrx/board.actions';
-import { selectAll, selectBoardState, selectEntities } from './ngrx/board.reducer';
+import { Injectable } from '@angular/core';
 import { EntityState } from '@ngrx/entity';
+import { Store } from '@ngrx/store';
+import { Observable, map, tap } from 'rxjs';
+import { Config } from '../config';
+import { Board } from './board';
+import * as BoardActions from './ngrx/board.actions';
 
 @Injectable()
 export class BoardService {
@@ -35,18 +33,21 @@ export class BoardService {
   }
 
   create(board: Pick<Board, 'title'>): Observable<Board> {
+    this.store.dispatch(BoardActions.createBoard({ board }))
     return this.http.post<Board>(`${ this.config.apiUrl }/board`, board).pipe(
       tap(board => this.store.dispatch(BoardActions.createdBoard({ board }))),
     );
   }
 
   update(id: string, board: Pick<Board, 'title'>): Observable<Board> {
+    this.store.dispatch(BoardActions.updateBoard({ board: { id }, update: board }))
     return this.http.patch<Board>(`${ this.config.apiUrl }/board/${ id }`, board).pipe(
       tap(board => this.store.dispatch(BoardActions.updatedBoard({ board: { id }, updated: board }))),
     );
   }
 
   remove(id: string): Observable<Board> {
+    this.store.dispatch(BoardActions.removeBoard({ board: { id } }))
     return this.http.delete<Board>(`${ this.config.apiUrl }/board/${ id }`).pipe(
       tap(board => this.store.dispatch(BoardActions.removedBoard({ board }))),
     );
