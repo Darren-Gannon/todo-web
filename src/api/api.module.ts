@@ -4,11 +4,19 @@ import { Config } from './config';
 import { BoardService } from './board';
 import { TaskService } from './task';
 import { StateService } from './state';
+import { HttpClientModule } from '@angular/common/http';
+import { StoreModule } from '@ngrx/store';
+import { BoardsReducer } from './board/ngrx/board.reducer';
+import { EffectsModule } from '@ngrx/effects';
+import { BoardEffects } from './board/ngrx/board.effects';
 
 @NgModule({
   declarations: [],
   imports: [
     CommonModule,
+    HttpClientModule,
+    StoreModule.forFeature('boards', BoardsReducer),
+    EffectsModule.forFeature(BoardEffects)
   ],
   providers: [
     BoardService,

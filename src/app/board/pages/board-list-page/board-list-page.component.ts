@@ -9,9 +9,7 @@ import { delay } from 'rxjs';
 })
 export class BoardListPageComponent {
 
-  public boards$ = this.boardService.find().pipe(
-    delay(200),
-  );
+  public readonly boards$ = this.boardService.find();
 
   constructor(
     private boardService: BoardService,

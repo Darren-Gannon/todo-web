@@ -9,6 +9,8 @@ import { BoardService } from '../../../api';
 })
 export class AppPageComponent {
 
+  public boards$ = this.boardService.find();
+
   constructor(
     public readonly authService: AuthService,
     public readonly boardService: BoardService,

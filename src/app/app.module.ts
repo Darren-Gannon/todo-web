@@ -19,6 +19,8 @@ import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { AuthModule } from '@auth0/auth0-angular';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
+import { StoreModule } from '@ngrx/store';
+import { EffectsModule } from '@ngrx/effects';
 
 @NgModule({
   declarations: [
@@ -32,7 +34,9 @@ import { MatListModule } from '@angular/material/list';
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    ApiModule,
+    ApiModule.forRoot({
+      apiUrl: 'http://localhost:3000'
+    }),
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
@@ -47,6 +51,8 @@ import { MatListModule } from '@angular/material/list';
         redirect_uri: window.location.origin,
       }
     }),
+    StoreModule.forRoot({}, {}),
+    EffectsModule.forRoot([]),
   ],
   providers: [
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
