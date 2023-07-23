@@ -2,12 +2,23 @@
     <div class="container">
         <div class="row">
             <p>
-                <ng-container *ngIf="states$ | async as states">
-                    <mat-action-list role="list" cdkDropList (cdkDropListDropped)="drop($event, states, board)">
-                        <mat-list-item role="listitem" *ngFor="let state of states" cdkDrag [cdkDragData]="state">{{
-                            state.title }}</mat-list-item>
-                    </mat-action-list>
-                </ng-container>
+                <mat-card>
+                    <button routerLink=".." mat-icon-button color="primary">
+                        <mat-icon>arrow_back</mat-icon>
+                    </button>
+                </mat-card>
+            </p>
+        </div>
+        <div class="row">
+            <p>
+                <mat-card class="col-xs-12 col-sm-6 col-md-4">
+                    <ng-container *ngIf="states$ | async as states">
+                        <mat-action-list role="list" cdkDropList (cdkDropListDropped)="drop($event, states, board)">
+                            <mat-list-item role="listitem" *ngFor="let state of states" cdkDrag [cdkDragData]="state">{{
+                                state.title }}</mat-list-item>
+                        </mat-action-list>
+                    </ng-container>
+                </mat-card>
             </p>
         </div>
         <hr>
