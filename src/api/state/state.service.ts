@@ -19,18 +19,13 @@ export class StateService {
     private store: Store<{ states: EntityState<State> }>,
   ) { }
 
-  private states: { [id: Board['id']]: {[id: State['id']]: State} } = JSON.parse(localStorage.getItem('STATES_STORAGE') ?? '{}');
-  private statesSubject_ = new BehaviorSubject(this.states);
-  private readonly statesSub = this.statesSubject_.subscribe(states => {
-    localStorage.setItem('STATES_STORAGE', JSON.stringify(states))
-  })
-
   find(boardId: Board['id']): Observable<State[]> {
     this.store.dispatch(StateActions.findAllStates({ board: { id: boardId } }))
     return this.store.select(state => state.states).pipe(
       map(state => state.entities),
       map(entities => Object.values(entities) as State[]),
       map(states => states.filter(state => state.boardId == boardId)),
+      map(states => states.sort((a, b) => a.orderIndex - b.orderIndex)),
     ) 
   }
 

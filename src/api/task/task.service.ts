@@ -5,6 +5,9 @@ import { Board } from '../board';
 import { v4 as uuid } from 'uuid';
 import { HttpClient } from '@angular/common/http';
 import { Config } from '../config';
+import { Store } from '@ngrx/store';
+import { EntityState } from '@ngrx/entity';
+import * as TaskActions from './ngrx/task.actions';
 
 @Injectable()
 export class TaskService {
@@ -18,53 +21,36 @@ export class TaskService {
   constructor(
     private http: HttpClient,
     private config: Config,
+    private store: Store<{ tasks: EntityState<Task> }>,
   ) { }
 
   find(boardId: Board['id']): Observable<Task[]> {
-    this.http.get<Task[]>(`${ this.config.apiUrl }/board/${ boardId }/task`).subscribe(tasks => {
-      if(!this.tasks) this.tasks = {};
-      if(!this.tasks[boardId]) this.tasks[boardId] = {};
-      const tasksMap = tasks.reduce((acc, item) => {
-        acc[item.id] = item;
-        return acc;
-      }, {} as any)
-      this.tasks[boardId] = tasksMap;
-      this.tasksSubject_.next(this.tasks);
-    })
-    return this.tasksSubject_.pipe(
-      map(tasksMap => tasksMap[boardId] ? Object.values(tasksMap[boardId]) ?? [] : []),
-      share(),
-    );
+    this.store.dispatch(TaskActions.findAllTasks({ board: { id: boardId }}))
+    return this.store.select(state => state.tasks).pipe(
+      map(state => state.entities),
+      map(entities => Object.values(entities) as Task[]),
+      map(tasks => tasks.filter(state => state.boardId == boardId)),
+    ) 
   }
 
   create(boardId: Board['id'], task: Pick<Task, 'title' | 'description' | 'stateId'>): Observable<Task> {
+    this.store.dispatch(TaskActions.createTask({ board: { id: boardId }, task }))
     return this.http.post<Task>(`${ this.config.apiUrl }/board/${ boardId }/task`, task).pipe(
-      tap(tasks => {
-        if(!this.tasks) this.tasks = {};
-        if(!this.tasks[boardId]) this.tasks[boardId] = {};
-        this.tasks[boardId][tasks.id] = tasks;
-        this.tasksSubject_.next(this.tasks);
-      }),
+      tap(task => this.store.dispatch(TaskActions.createdTask({ board: { id: boardId }, task }))),
     );
   }
 
-  update(boardId: Board['id'], id: string, task: Pick<Task, 'title'>): Observable<Task> {
+  update(boardId: Board['id'], id: string, task: Pick<Task, 'title' | 'description' | 'stateId'>): Observable<Task> {
+    this.store.dispatch(TaskActions.updateTask({ board: { id: boardId }, task: { id }, update: task }))
     return this.http.patch<Task>(`${ this.config.apiUrl }/board/${ boardId }/task/${ id }`, task).pipe(
-      tap(task => {
-        if(!this.tasks) this.tasks = {};
-        if(!this.tasks[boardId]) this.tasks[boardId] = {};
-        this.tasks[boardId][task.id] = task;
-        this.tasksSubject_.next(this.tasks);
-      }),
+      tap(task => this.store.dispatch(TaskActions.updatedTask({ board: { id: boardId }, task: { id }, updated: task }))),
     );
   }
 
   remove(boardId: Board['id'], id: string): Observable<Task> {
+    this.store.dispatch(TaskActions.removeTask({ board: { id: boardId }, task: { id } }))
     return this.http.delete<Task>(`${ this.config.apiUrl }/board/${ boardId }/task/${ id }`).pipe(
-      tap(task => {
-        delete this.tasks[boardId][id];
-        this.tasksSubject_.next(this.tasks);
-      }),
+      tap(task => this.store.dispatch(TaskActions.removedTask({ board: { id: boardId }, task }))),
     );
   }
 }

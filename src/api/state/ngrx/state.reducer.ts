@@ -29,10 +29,11 @@ export const initialState = adapter.getInitialState({
 
 export const StatesReducer = createReducer(
     initialState,
+    on(StateActions.foundAllStates, (state, { board, states }) => adapter.addMany(states, state)),
     on(StateActions.createdState, (state, { board, state: _state }) => adapter.addOne(_state, state)),
-    on(StateActions.updatedState, (state, { board, state: _state }) => adapter.updateOne({ 
+    on(StateActions.updatedState, (state, { board, state: _state, updated }) => adapter.updateOne({ 
         id: _state.id,
-        changes: _state,
+        changes: updated,
     }, state)),
     on(StateActions.removedState, (state, { board, state: _state }) => adapter.removeOne(_state.id, state)),
     on(StateActions.swappedState, (state, { board, states }) => adapter.updateMany(states.map(state => ({

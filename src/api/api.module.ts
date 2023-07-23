@@ -11,6 +11,8 @@ import { EffectsModule } from '@ngrx/effects';
 import { BoardEffects } from './board/ngrx/board.effects';
 import { StatesEffects } from './state/ngrx/state.effects';
 import { StatesReducer } from './state/ngrx/state.reducer';
+import { TaskEffects } from './task/ngrx/task.effects';
+import { TaskReducer } from './task/ngrx/task.reducer';
 
 @NgModule({
   declarations: [],
@@ -19,7 +21,8 @@ import { StatesReducer } from './state/ngrx/state.reducer';
     HttpClientModule,
     StoreModule.forFeature('boards', BoardsReducer),
     StoreModule.forFeature('states', StatesReducer),
-    EffectsModule.forFeature(BoardEffects, StatesEffects),
+    StoreModule.forFeature('tasks', TaskReducer),
+    EffectsModule.forFeature(BoardEffects, StatesEffects, TaskEffects),
   ],
   providers: [
     BoardService,

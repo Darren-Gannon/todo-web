@@ -33,7 +33,7 @@ export const BoardsReducer = createReducer(
     on(BoardActions.createdBoard, (state, { board }) => adapter.addOne(board, state)),
     on(BoardActions.updatedBoard, (state, { board, updated }) => adapter.updateOne({
         id: board.id,
-        changes: board,
+        changes: updated,
     }, state)),
     on(BoardActions.removedBoard, (state, { board }) => adapter.removeOne(board.id, state)),
 );
