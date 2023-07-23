@@ -1,10 +1,22 @@
-<div class="container">
-    <div class="row">
-        <p>
-            <ng-container *ngIf="board$ | async as board">
-                <hr>
-                <button mat-stroked-button color="warn" (click)="deleteBoard(board)">Delete Board</button>
-            </ng-container>
-        </p>
+<ng-container *ngIf="board$ | async as board">
+    <div class="container">
+        <div class="row">
+            <p>
+                <ng-container *ngIf="states$ | async as states">
+                    <mat-action-list role="list" cdkDropList (cdkDropListDropped)="drop($event, states, board)">
+                        <mat-list-item role="listitem" *ngFor="let state of states" cdkDrag [cdkDragData]="state">{{
+                            state.title }}</mat-list-item>
+                    </mat-action-list>
+                </ng-container>
+            </p>
+        </div>
+        <hr>
+        <div class="row">
+            <p>
+                <ng-container>
+                    <button mat-stroked-button color="warn" (click)="deleteBoard(board)">Delete Board</button>
+                </ng-container>
+            </p>
+        </div>
     </div>
-</div>
+</ng-container>

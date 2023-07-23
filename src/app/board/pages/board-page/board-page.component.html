@@ -40,8 +40,8 @@
             <ng-container *ngIf="states$ | async as states; else loadingTmpl">
                 <ng-container  *ngFor="let state of states; let odd = odd">
                     <div class="column">
-                        <mat-toolbar [color]="odd ? 'primary' : 'accent'">
-                            <div class="clickable" style="padding-left: 1vw; padding-right: 1vw;" (click)="openState_.next({ state })">
+                        <mat-toolbar class="clickable" [color]="odd ? 'primary' : 'accent'" (click)="openState_.next({ state })">
+                            <div style="padding-left: 1vw; padding-right: 1vw;">
                                 <h3>{{ state.title }}</h3>
                             </div>
                         </mat-toolbar>

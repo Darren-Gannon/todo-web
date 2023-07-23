@@ -11,6 +11,7 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { BoardRoutingModule } from './board-routing.module';
 import { NewBoardPageComponent } from './pages/new-board-page/new-board-page.component';
@@ -19,6 +20,7 @@ import { BoardPageComponent } from './pages/board-page/board-page.component';
 import { TaskDialogComponent } from './pages/board-page/task-dialog/task-dialog.component';
 import { StateDialogComponent } from './pages/board-page/state-dialog/state-dialog.component';
 import { BoardSettingsPageComponent } from './pages/board-settings-page/board-settings-page.component';
+import { MatListModule } from '@angular/material/list';
 
 
 @NgModule({
@@ -44,6 +46,8 @@ import { BoardSettingsPageComponent } from './pages/board-settings-page/board-se
     MatToolbarModule,
     MatDialogModule,
     MatSelectModule,
+    MatListModule,
+    DragDropModule,
   ]
 })
 export class BoardModule { }
