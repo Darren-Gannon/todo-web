@@ -75,7 +75,6 @@ export class BoardService {
     this.updateEnd$,
     this.removeEnd$,
   ).pipe(
-    // tap(val => console.log(val)),
     scan((state, action) => {
       switch(action.type) {
         case 'findAll':
@@ -89,8 +88,6 @@ export class BoardService {
             data: { 
               ...state.data, 
               ...(action as any).data.reduce((acc: any, current: any) => ({ ...acc, [current.id]: {
-                loading: false,
-                loaded: true,
                 creating: false,
                 updating: false,
                 deleting: false,
@@ -107,6 +104,7 @@ export class BoardService {
               [(action as any).data]: {
                 ...state.data?.[(action as any).data],
                 loading: true,
+                loaded: false,
                 updating: false,
                 creating: false,
                 deleting: false,
@@ -149,7 +147,8 @@ export class BoardService {
             data: { 
               ...state.data, 
               [(action as any).data.id]: {
-                creating: false,
+                loading: false,
+                loaded: true,
                 ...state.data?.[(action as any).data.id],
                 data: (action as any).data,
               },
@@ -201,22 +200,18 @@ export class BoardService {
       loaded: false,
       data: {},
     }) as State),
-    // tap(val => console.log(val)),
     share(),
   );
 
   find(): Observable<State> {
-    setTimeout(() => this.findAll_.next(null), 0);
-    return this.state$.pipe(
-      share(),
-    );
+    this.findAll_.next(null);
+    return this.state$;
   }
 
   findOne(id: Board['id']): Observable<BoardState | undefined> {
-    setTimeout(() => this.findOne_.next(id), 0);
+    this.findOne_.next(id);
     return this.state$.pipe(
       map(state => state.data?.[id]),
-      share(),
     );
   }
 
