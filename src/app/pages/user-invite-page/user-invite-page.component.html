@@ -1,0 +1,27 @@
+<ng-container *ngIf="{
+    invite: invite$ | async,
+} as vm">
+    <ng-container *ngIf="vm.invite as invite">
+        <div id="invite-container">
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>
+                        <h2>You have been invited to join {{ invite.boardTitle }}</h2>
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <p>
+                        You have been invited as a {{ invite.role | titlecase }} to join the board {{ invite.boardTitle }}.
+                    </p>
+                    <pre>{{ invite | json }}</pre>
+                </mat-card-content>
+                <mat-card-actions>
+                    <div id="actions">
+                        <button mat-raised-button color="warn" (click)="declineInvite(invite.id)">Decline</button>
+                        <button mat-raised-button color="primary" (click)="acceptInvite(invite)">Accept</button>
+                    </div>
+                </mat-card-actions>
+            </mat-card>
+        </div>
+    </ng-container>
+</ng-container>

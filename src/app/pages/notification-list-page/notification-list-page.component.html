@@ -1,0 +1,29 @@
+<ng-container *ngIf="{
+    notifications: notifications$ | async,
+    readNotification: readNotification$ | async
+} as vm">
+    <div id="notification-list-container">
+        <ng-container *ngIf="vm.notifications as notifications">
+            <ng-container *ngFor="let notification of notifications">
+                <div class="notification-container">
+                    <a style="text-decoration: unset; color: unset;" [routerLink]="getNotificationLink(notification)">
+                        <mat-card>
+                            <div class="notification-title-container">
+                                <span>{{ notification.title }}</span>
+                                <ng-container *ngIf="!notification.read">
+                                    <button mat-icon-button color="accent" (click)="$event.preventDefault(); $event.stopPropagation(); readNotificationEmitter.next(notification)">
+                                        <mat-icon>adjust</mat-icon>
+                                    </button>
+                                </ng-container>
+                                <ng-template #NotificationRead>
+                                    <span></span>
+                                </ng-template>
+                            </div>
+                            {{ notification.createdAt | date : 'shortDate' }}
+                        </mat-card>
+                    </a>
+                </div>
+            </ng-container>
+        </ng-container>
+    </div>
+</ng-container>

@@ -1,45 +1,91 @@
-<mat-drawer-container autosize>
-    
-    <mat-toolbar color="primary">
-        <div class="container">
-            <div class="row" style="align-items: center; display: flex;">
-                <button mat-icon-button (click)="drawer.toggle()">
-                    <mat-icon>menu</mat-icon>
-                </button>
-                <a routerLink="/"
-                    style="align-items: center; display: flex; color: unset; text-decoration: unset; gap: 1vw;">
-                    <img src="assets/favicon.ico" alt="logo">
-                    <h1 style="display: inline;">TODO</h1>
-                </a>
-                <span style="flex-grow: 1;"></span>
-                <button mat-icon-button [matMenuTriggerFor]="menu">
-                    <mat-icon>menu</mat-icon>
-                </button>
-                
-                <mat-menu #menu="matMenu">
-                    <a style="text-decoration: none; color: unset;" mat-menu-item routerLink="/app/account">
-                        <mat-icon color="primary">account_circle</mat-icon>
-                        <span>Account</span>
-                    </a>
-                    <hr>
-                    <button mat-menu-item (click)="authService.logout()">
-                        <mat-icon color="warn">logout</mat-icon>
-                        <span>Sign Out</span>
-                    </button>
-                </mat-menu>
+<ng-container *ngIf="{
+    boards: boards$ | async,
+    notifications: notifications$ | async,
+    unreadNotifications: unreadNotifications$ | async,
+} as vm">
+    <mat-drawer-container>
+        <div>
+
+            <mat-toolbar color="primary">
+                <div id="navbar">
+                    <div style="display: flex; align-items: center;">
+                        <button mat-icon-button (click)="drawer.toggle()">
+                            <mat-icon>menu</mat-icon>
+                        </button>
+                        <a routerLink="/" id="logo">
+                            <img src="assets/redketchup/favicon-32x32.png" alt="logo">
+                        </a>
+                    </div>
+                    <div>
+
+                        <ng-container *ngIf="vm.notifications as notifications">
+                            <button mat-icon-button [matMenuTriggerFor]="notificationMenu" [matBadge]="vm.unreadNotifications" [matBadgeHidden]="vm.unreadNotifications == 0" matBadgeColor="warn" style="font-size: .8rem;">
+                                <mat-icon>notifications</mat-icon>
+                            </button>
+
+                            <mat-menu #notificationMenu="matMenu">
+                                <div id="notifications-menu">
+                                    <ng-container *ngFor="let notification of notifications">
+                                        <a class="notification-container" mat-menu-item [routerLink]="getNotificationLink(notification)">
+                                            <div class="notification-link">
+                                                <mat-icon *ngIf="!notification.read" color="accent">adjust</mat-icon>
+                                                <span>{{ notification.title }}</span>
+                                            </div>
+                                        </a>
+                                    </ng-container>
+                                </div>
+                                <mat-divider></mat-divider>
+                                <a style="text-decoration: none; color: unset;" mat-menu-item
+                                    routerLink="/app/notification">
+                                    <mat-icon color="primary">center_focus_weak</mat-icon>
+                                    <span>Notification Center</span>
+                                </a>
+                            </mat-menu>
+                        </ng-container>
+
+                        <button mat-icon-button [matMenuTriggerFor]="settingsMenu">
+                            <mat-icon>menu</mat-icon>
+                        </button>
+
+                        <mat-menu #settingsMenu="matMenu">
+                            <a style="text-decoration: none; color: unset;" mat-menu-item routerLink="/app/account">
+                                <mat-icon color="primary">account_circle</mat-icon>
+                                <span>Account</span>
+                            </a>
+                            <hr>
+                            <button mat-menu-item (click)="authService.logout()">
+                                <mat-icon color="warn">logout</mat-icon>
+                                <span>Sign Out</span>
+                            </button>
+                        </mat-menu>
+                    </div>
+                </div>
+            </mat-toolbar>
+
+            <div style="margin-bottom: 6px;">
+                <router-outlet></router-outlet>
             </div>
+
         </div>
-    </mat-toolbar>
 
-    <mat-drawer #drawer mode="over" class="col-xs-11 col-sm-8 col-md-3">
-        <ng-container *ngIf="boards$ | async as boards">
-            <mat-nav-list>
-                <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board', board.id]" *ngFor="let board of boards">{{ board.title }}</a>
-                <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board/new']">Create</a>
-            </mat-nav-list>
-        </ng-container>
-    </mat-drawer>
-    
-    <router-outlet></router-outlet>
+        <mat-drawer #drawer mode="over" id="drawer">
+            <ng-container *ngIf="vm.boards as boards">
+                <mat-nav-list>
+                    <ng-container *ngFor="let board of boards.data">
+                        <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board', board.data.id]">{{
+                            board.data.title }}</a>
+                    </ng-container>
+                    <ng-container *ngIf="boards.stale; else createBoardTmpl">
+                        <a class="stale" mat-list-item>
+                            <span class="text"></span>
+                        </a>
+                    </ng-container>
+                    <ng-template #createBoardTmpl>
+                        <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board/new']">Create</a>
+                    </ng-template>
+                </mat-nav-list>
+            </ng-container>
+        </mat-drawer>
 
-</mat-drawer-container>
+    </mat-drawer-container>
+</ng-container>

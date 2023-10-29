@@ -1,32 +1,71 @@
-#columns-container {
-    display: flex;
-    gap: 1vw;
-    flex-direction: row;
-    flex-wrap: nowrap;
-}
+@import '/src/import-styles.scss';
 
-.column {
-    display: flex;
-    flex-direction: column;
-    padding: 1vh 1vw;
-    border-radius: 5px;
-    min-width: 20vw;
-    max-width: 20vw;
-    width: 20vw;
+#board-header {
+    @extend .container;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
 
-    &:nth-child(even) {
-        background-color: #efefef;
+    #board-header-title-container {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        #board-header-title {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            @extend .gap-sm;
+        }
     }
 }
 
-#tasks-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    justify-content: stretch;
+#columns-container {
+    @extend .container;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+
+    > .column {
+        display: flex;
+        flex-basis: 250px;
+        flex-grow: 0;
+        flex-shrink: 0;
+        flex-direction: column;
+
+        & > .column-content {
+            display: flex;
+            @extend .gap-sm;
+            justify-content: stretch;
+            flex-direction: column;
+            padding: .5rem;
+
+            & > .tasks-container {
+                display: flex;
+                @extend .gap-sm;
+                flex-direction: column;
+            }
+        }
+
+        &.stale #text {
+            @extend .skeleton;
+            width: 10rem;
+            height: 2rem;
+            border-radius: 5px;
+            opacity: .7;
+        }
+    }
 }
 
-#create-button-container {
-    display: grid;
-    grid-template-columns: 1fr;
+.task-content {
+    display: flex;
+    flex-direction: column;
     justify-content: stretch;
+
+    & > .task-content-created-at {
+        display: flex;
+        justify-content: flex-end;
+        @extend .dark-gray-text;
+    }
 }

@@ -1,3 +1,28 @@
-.board {
-    min-height: 10vh;
+@import '/src/import-styles.scss';
+
+#board-list-container {
+    @extend .container;
+    @extend .gap-sm;
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+    padding: .5rem;
+
+    &>.board {
+        @extend .unstyle-a;
+        height: 5rem;
+        flex-basis: 200px;
+        flex-grow: 1;
+        flex-shrink: 0;
+        max-width: 400px;
+        white-space: nowrap;
+        overflow: hidden;
+
+        &.stale .board-title {
+            @extend .skeleton;
+            border-radius: 5px;
+            height: 2rem;
+            width: 10rem;
+        }
+    }
 }

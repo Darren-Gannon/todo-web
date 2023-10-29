@@ -1,0 +1,157 @@
+@import '/src/import-styles.scss';
+
+#board-settings-container {
+    @extend .container;
+}
+
+#settings-and-user-container {
+    display: grid;
+    grid-template-columns: 300px auto;
+    @extend .gap-sm;
+}
+
+#settings-page-header {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    @extend .gap-sm;
+    align-items: center;
+    flex-direction: row;
+}
+
+.state-list-item {
+    display: flex;
+    @extend .gap-sm;
+    align-items: center;
+    
+    & > .state-list-item-title {
+        flex-grow: 1;
+    }
+
+    &.stale > .state-list-item-title {
+        @extend .skeleton;
+        height: 2rem;
+        width: 10rem;
+        border-radius: 5px;
+    }
+
+    &.new  {
+        justify-content: center;
+    }
+}
+
+mat-list-item:not(:hover)  .state-list-item > .state-list-item-actions {
+    display: none;
+}
+mat-list-item:hover  .state-list-item > .state-list-item-actions {
+    display: block;
+
+    & > *:not(:hover) {
+        opacity: .5;
+    }
+
+    & > *:hover {
+        opacity: 1;
+    }
+}
+
+#user-container {
+    display: flex;
+    flex-direction: column;
+    @extend .gap-md;
+    
+    #user-list-container, #invite-list-container {
+        display: flex;
+        flex-direction: column;
+        @extend .gap-md;
+        @extend .padding-sm;
+    }
+
+    .member-container {
+        display: grid;
+        grid-template-areas: 'picture name role trash'
+                             'picture email role trash';
+        
+        grid-template-columns: max-content auto max-content max-content;
+        @extend .gap-sm;
+        height: 3rem;
+        align-items: center;
+
+        & > .trash-can {
+            grid-area: trash;
+        }
+
+        & > .member-picture {
+            grid-area: picture;
+            height: inherit;
+            border-radius: 5px;
+        }
+
+        & > .member-name {
+            grid-area: name;
+        }
+
+        & > .member-email {
+            grid-area: email;
+        }
+
+        & > .member-role {
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid lightgrey;
+            border-radius: 5px;
+            grid-area: role;
+            @extend .padding-sm;
+        }
+    }
+
+    .invite-container {
+        display: grid;
+        grid-template-areas: 'picture email role trash';
+        
+        grid-template-columns: max-content auto max-content max-content;
+        @extend .gap-sm;
+        height: 3rem;
+        align-items: center;
+
+        & > .member-picture {
+            grid-area: picture;
+            height: inherit;
+            border-radius: 5px;
+        }
+
+        & > .member-email {
+            grid-area: email;
+        }
+
+        & > .member-role {
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid lightgrey;
+            border-radius: 5px;
+            grid-area: role;
+            @extend .padding-sm;
+        }
+
+        & > .trash-can {
+            grid-area: trash;
+        }
+    }
+
+    #invite-user-container {
+        display: flex;
+        flex-direction: row;
+        @extend .gap-sm;
+        @extend .padding-sm;
+
+        #user-role {
+            width: 7.5rem;
+        }
+
+        & > #invite-user-actions {
+            display: flex;
+            flex-direction: row;
+            @extend .gap-sm;
+        }
+    }
+}

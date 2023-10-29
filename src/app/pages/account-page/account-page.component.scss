@@ -1,0 +1,7 @@
+@import '/src/import-styles.scss';
+
+#user-container {
+    @extend .container;
+    @extend .margin-sm-top;
+    @extend .margin-sm-bottom;
+}

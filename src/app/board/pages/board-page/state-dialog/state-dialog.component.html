@@ -1,9 +1,0 @@
-<form [formGroup]="stateForm" (ngSubmit)="stateForm.valid && dialogRef.close(stateForm.value)">
-    <mat-form-field>
-        <mat-label><Title></Title></mat-label>
-        <input formControlName="title" matInput type="text">
-    </mat-form-field>
-    <div class="actions">
-        <button type="submit" mat-raised-button color="primary">Submit</button>
-    </div>
-</form>

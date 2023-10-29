@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { EntityState } from '@ngrx/entity';
 import { Store } from '@ngrx/store';
 import { Observable, map, tap } from 'rxjs';
 import { Config } from '../config';
 import { Board } from './board';
 import * as BoardActions from './ngrx/board.actions';
+import { BoardState } from './ngrx/board.state';
+import { CachedResult } from '../cache-result';
 
 @Injectable()
 export class BoardService {
@@ -13,22 +14,20 @@ export class BoardService {
   constructor(
     private http: HttpClient,
     private config: Config,
-    private store: Store<{ boards: EntityState<Board> }>,
+    private store: Store<{ boards: BoardState }>,
   ) { }
 
-  find(): Observable<Board[]> {
+  find(): Observable<CachedResult<CachedResult<Board>[]>> {
     this.store.dispatch(BoardActions.findAllBoards())
     return (this.store.select(state => state.boards)).pipe(
-      map(state => state.entities),
-      map(entities => Object.values(entities) as Board[]),
+      map(boardState => ({ stale: boardState.stale, data: [...boardState.data.values()] })),
     ) 
   }
 
-  findOne(id: Board['id']): Observable<Board> {
+  findOne(id: Board['id']): Observable<CachedResult<Board> | undefined> {
     this.store.dispatch(BoardActions.findOneBoard({ board: { id }}))
     return (this.store.select(state => state.boards)).pipe(
-      map(state => state.entities),
-      map(entities => entities[id] as Board),
+      map(state => state.data.get(id)),
     ) 
   }
 

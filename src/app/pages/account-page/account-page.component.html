@@ -1,7 +1,7 @@
 <div class="container">
     <div class="row">
         <ng-container *ngIf="authService.user$ | async as user">
-            <p>
+            <div id="user-container">
                 <mat-card>
                     <mat-card-header>
                         <div mat-card-avatar style="background-image: url('{{ user.picture }}'); background-size: cover;"></div>
@@ -11,7 +11,7 @@
                     <mat-card-content>
                     </mat-card-content>
                 </mat-card>
-            </p>
+            </div>
         </ng-container>
     </div>
 </div>

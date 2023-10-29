@@ -1,91 +1,69 @@
-<div class="container">
-    <div class="row">
-        <p>
-            <ng-container *ngIf="board$ | async as board; else loadingTmpl">
-                <mat-card>
-                    <div class="container" style="display: flex; gap: 1vw; align-items: center;">
-                        <ng-container *ngIf="{ editing: false } as vm">
-                            <ng-container *ngIf="!vm.editing; else editBoardTitleTmpl">
-                                <div style="width: 100%; display: grid; grid-template-columns: repeat(2, max-content) auto max-content; align-items: center;">
-                                    <h2 style="display: inline;">{{ board.title }}</h2>
-                                    <button mat-icon-button color="primary" (click)="vm.editing = true">
-                                        <mat-icon>edit</mat-icon>
-                                    </button>
-                                    <span></span>
-                                    <button mat-icon-button color="primary" routerLink="settings">
-                                        <mat-icon>settings</mat-icon>
-                                    </button>
-                                </div>
-                            </ng-container>
-                            <ng-template #editBoardTitleTmpl>
-                                <form [formGroup]="boardForm" (submit)="vm.editing = false; boardForm.valid && updateBoard_.next(boardForm.value)">
-                                    <mat-form-field>
-                                        <mat-label>Title</mat-label>
-                                        <input formControlName="title" matInput type="text">
-                                        <button type="button" matSuffix mat-icon-button color="warn" (click)="vm.editing = false; boardForm.patchValue(board)">
-                                            <mat-icon>cancel</mat-icon>
-                                        </button>
-                                        <button type="submit" matSuffix mat-icon-button color="primary">
-                                            <mat-icon>done</mat-icon>
-                                        </button>
-                                    </mat-form-field>
-                                </form>
-                            </ng-template>
-                        </ng-container>
+<ng-container *ngIf="{ board: board$ | async, states: states$ | async } as vm">
+    <ng-container *ngIf="vm.board as board; else loadingTmpl">
+        <div id="board-header">
+            <mat-card>
+                <div id="board-header-title-container">
+                    <div id="board-header-title">
+                        <button routerLink=".." mat-icon-button color="primary">
+                            <mat-icon>arrow_back</mat-icon>
+                        </button>
+                        <h2>{{ board.data.title }}</h2>
                     </div>
-                </mat-card>
-            </ng-container>
-        </p>
-        <p id="columns-container">
-            <ng-container *ngIf="states$ | async as states; else loadingTmpl">
-                <ng-container  *ngFor="let state of states; let odd = odd">
+                    <button mat-icon-button color="primary" routerLink="settings">
+                        <mat-icon>settings</mat-icon>
+                    </button>
+                </div>
+            </mat-card>
+        </div>
+        <div id="columns-container">
+            <ng-container *ngIf="vm.states as states; else loadingTmpl">
+                <ng-container  *ngFor="let state of states.data; let odd = odd">
                     <div class="column">
-                        <mat-toolbar class="clickable" [color]="odd ? 'primary' : 'accent'" (click)="openState_.next({ state })">
-                            <div style="padding-left: 1vw; padding-right: 1vw;">
-                                <h3>{{ state.title }}</h3>
+                        <mat-toolbar [color]="odd ? 'primary' : 'accent'">
+                            <div>
+                                <h3>{{ state.data.title }}</h3>
                             </div>
                         </mat-toolbar>
-                        <p id="create-button-container">
-                            <button mat-raised-button [color]="odd ? 'accent' : 'primary'" (click)="openTask_.next({ states })">Create</button>
-                        </p>
-                        <div id="tasks-container">
-                            <ng-container *ngIf="state.tasks$ | async as tasks; else loadingTmpl">
-                                <ng-container *ngFor="let task of tasks">
-
-                                    <mat-card style="margin-top: 1vh;" mat-ripple (click)="openTask_.next({ task, states })">
-                                        <mat-card-header>
-                                            <mat-card-title>
-                                                <div>
-                                                    <h4 style="margin: 0;">{{ task.title }}</h4>
+                        <div class="column-content">
+                            <button class="create-task-button" mat-raised-button [color]="odd ? 'accent' : 'primary'" (click)="openTask_.next({ board: board.data, states: states.data, state: state.data })">Create</button>
+                            <div class="tasks-container">
+                                <ng-container *ngIf="state.data.tasks$ | async as tasks; else loadingTmpl">
+                                    <ng-container *ngFor="let task of tasks">
+        
+                                        <mat-card mat-ripple (click)="openTask_.next({ board: board.data, task, states: states.data, state: state.data })">
+                                            <mat-card-header>
+                                                <mat-card-title>
+                                                    <div>
+                                                        <h4>{{ task.title }}</h4>
+                                                    </div>
+                                                </mat-card-title>
+                                            </mat-card-header>
+                                            <mat-card-content>
+                                                <div class="task-content">
+                                                    <span class="task-content-description">{{ task.description }}</span>
+        
+                                                    <span class="task-content-created-at">{{ task.createdAt | date : 'shortDate' }}</span>
                                                 </div>
-                                            </mat-card-title>
-                                        </mat-card-header>
-                                        <mat-card-content>
-                                            <div>
-                                                <span>{{ task.description }}</span>
-
-                                                <span class="gray-text">{{ task.createdAt | date : 'shortDate' }}</span>
-                                            </div>
-                                        </mat-card-content>
-                                    </mat-card>
-
+                                            </mat-card-content>
+                                        </mat-card>
+        
+                                    </ng-container>
                                 </ng-container>
-                            </ng-container>
+                            </div>
                         </div>
                     </div>
                 </ng-container>
-                <div class="column">
-                    <mat-toolbar [color]="states.length % 2 == 0 ? 'primary' : 'accent'">
-                        <div style="display: grid; grid-template-columns: 1fr; width: 100%;">
-                            <button mat-raised-button [color]="states.length % 2 == 1 ? 'primary' : 'accent'" (click)="openState_.next({})">Create</button>
-                        </div>
-                    </mat-toolbar>
-                </div>
+                <ng-container *ngIf="states.stale">
+                    <div class="column stale">
+                        <mat-toolbar [color]="states.data.length % 2 == 1 ? 'primary' : 'accent'">
+                            <div id="text"></div>
+                        </mat-toolbar>
+                    </div>
+                </ng-container>
             </ng-container>
-        </p>
-    </div>
-</div>
-<br>
+        </div>
+    </ng-container>
+</ng-container>
 
 <ng-template #loadingTmpl>
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>

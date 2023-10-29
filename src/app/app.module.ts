@@ -21,6 +21,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
+import { LocationStrategy, HashLocationStrategy } from '@angular/common';
+import { NotificationListPageComponent } from './pages/notification-list-page/notification-list-page.component';
+import { NotificationPageComponent } from './pages/notification-page/notification-page.component';
+import { MatBadgeModule } from '@angular/material/badge';
+import { UserInvitePageComponent } from './pages/user-invite-page/user-invite-page.component';
 
 @NgModule({
   declarations: [
@@ -29,13 +34,16 @@ import { EffectsModule } from '@ngrx/effects';
     AppPageComponent,
     HomePageComponent,
     AccountPageComponent,
+    NotificationListPageComponent,
+    NotificationPageComponent,
+    UserInvitePageComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
     ApiModule.forRoot({
-      apiUrl: 'http://localhost:3000'
+      apiUrl: 'http://localhost:3000',
     }),
     MatToolbarModule,
     MatButtonModule,
@@ -44,19 +52,21 @@ import { EffectsModule } from '@ngrx/effects';
     MatMenuModule,
     MatCardModule,
     MatListModule,
+    MatBadgeModule,
     AuthModule.forRoot({
       domain: 'cortex-todo.us.auth0.com',
       clientId: 'empJeIxteS3FnsHr4958Kl5nHQmPxSrx',
       authorizationParams: {
         redirect_uri: window.location.origin,
+        audience: 'http://localhost:3000',
       }
     }),
     StoreModule.forRoot({}, {}),
     EffectsModule.forRoot([]),
   ],
   providers: [
-    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
-    { provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { panelClass: ['col-xs-10', 'col-sm-8', 'col-md-6'], height: '90vh' } },
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
+    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline', subscriptSizing: 'dynamic' } },
   ],
   bootstrap: [AppComponent]
 })

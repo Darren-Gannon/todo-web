@@ -1,12 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, ReplaySubject, Subscription, combineLatest, of, repeat, map, mergeMap, share, shareReplay, switchMap, tap, zip } from 'rxjs';
-import { Board, BoardService, State, StateService } from '../../../../api';
-import { Task, TaskService } from '../../../../api/task';
-import { TaskDialogComponent } from './task-dialog/task-dialog.component';
-import { StateDialogComponent } from './state-dialog/state-dialog.component';
-import { FormBuilder, Validators } from '@angular/forms';
+import { EMPTY, Subject, Subscription, map, mergeMap, switchMap, throwError } from 'rxjs';
+import { Board, BoardService, State, StateService, Task, TaskService } from '../../../../api';
+import { CachedResult } from '../../../../api/cache-result';
+import { TaskDialogComponent, TaskDialogResult } from './task-dialog/task-dialog.component';
 
 @Component({
   selector: 'app-board-page',
@@ -16,94 +15,67 @@ import { FormBuilder, Validators } from '@angular/forms';
 export class BoardPageComponent implements OnInit, OnDestroy {
 
   public readonly boardForm = this.fb.group({
-    title: this.fb.control('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3) ]})
+    title: this.fb.control('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] })
   })
 
   private readonly boardId$ = this.route.paramMap.pipe(
     map(params => params.get('boardId')!),
   );
-  
+
   public readonly board$ = this.boardId$.pipe(
-    switchMap(boardId => this.boardsService.findOne(boardId)),
-    shareReplay(1),
-  );
-  
-  public readonly states$ = 
-    this.boardId$.pipe(
-      switchMap(boardId => this.stateService.find(boardId)),
-    ).pipe(
-    map((states) => states.map(state => ({ 
-      ...state,
-      tasks$: this.boardId$.pipe(
-        switchMap(boardId => this.taskService.find(boardId)),
-        map(tasks => tasks.filter(task => task.stateId == state.id))
-      )
-    }))),
+    switchMap(boardId => this.boardService.findOne(boardId)),
   );
 
-  public readonly openState_ = new ReplaySubject<{ state?: State }>(1);
-  private readonly openState$ = this.openState_.pipe(
-    repeat(),
-  );
-  private readonly updateCreateStatus$ = combineLatest([
-    this.boardId$,
-    this.openState$.pipe(
-      mergeMap(({ state }) => zip([
-        of(state),
-        this.dialog.open(StateDialogComponent, {
+  public readonly states$ = this.boardId$.pipe(
+    switchMap(boardId => this.stateService.find(boardId)),
+  ).pipe(
+    map((states) => {
+      const ret = {
+        ...states,
+        data: states.data.map(state => ({
+          ...state,
           data: {
-            state,
+            ...state.data,
+            tasks$: this.boardId$.pipe(
+              switchMap(boardId => this.taskService.find(boardId)),
+              map(tasks => tasks.filter(task => task.stateId == state.data.id))
+            ),
           },
-          panelClass: ['col-xs-10', 'col-sm-6', 'col-md-4'],
-          height: 'auto',
-        }).afterClosed()
-      ]),
-    )),
-  ]).pipe(
-    switchMap(([boardId, state]) => {
-      const [original, update] = state;
-      if(!update) return EMPTY;
-      if(!original)
-        return this.stateService.create(boardId, update);
-      return this.stateService.update(boardId, original?.id, update);
-    })
-  );
-  public readonly openTask_ = new ReplaySubject<{ task?: Task, states: State[] }>(1);
-  private readonly openTask$ = this.openTask_.pipe(
-    share(),
-  );
-  private readonly updateCreateTask$ = combineLatest([
-    this.boardId$,
-    this.openTask$,
-    this.openTask$.pipe(
-      mergeMap(({ task, states }) => this.dialog.open(TaskDialogComponent, {
-        data: {
-          task,
-          states,
-        }
-      }).afterClosed(),
-    )),
-  ]).pipe(
-    mergeMap(([boardId, original, update]) => {
-      if(!update) return EMPTY;
-      if(!original.task)
-        return this.taskService.create(boardId, update);
-      return this.taskService.update(boardId, original.task.id, update);
+        }))
+      };
+      return ret;
     }),
   );
 
-  public readonly updateBoard_ = new ReplaySubject<Partial<Board>>(1);
-  private updateBoard$ = combineLatest([
-    this.board$,
-    this.updateBoard_,
-  ]).pipe(
-    switchMap(([original, update]) => this.boardsService.update(original.id, { title: update.title! }))
-  );
+  public readonly openTask_ = new Subject<{ board: Board, task?: Task, states: CachedResult<State>[], state: State }>();
+  private readonly openTask$ = this.openTask_.pipe();
+  private readonly updateCreateTask$ = this.openTask$.pipe(
+    switchMap(({ task: original, states, board, state }) => this.dialog.open(TaskDialogComponent, {
+      data: { task: original, states, state },
+    }).afterClosed().pipe(
+      map((update?: TaskDialogResult) => ({ original, update, board }))
+    ),
+    )).pipe(
+      mergeMap(({ original, update, board }) => {
+        if (!update)
+          return EMPTY; // No update given just ignore
+        else if (update.action == 'delete') {
+          if (!original) // Request to delete nothing, user wanted to created new task, but clicked delete
+            return EMPTY;
+          return this.taskService.remove(board.id, original.id);
+        } else if (update.action == 'submit') {
+          if (!original)
+            return this.taskService.create(board.id, update.task);
+          return this.taskService.update(board.id, original.id, update.task);
+        }
+        return throwError(() => new Error('Unrecognized action')); // Unrecognised action
+      }),
+    );
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly dialog: MatDialog,
-    private readonly boardsService: BoardService,
+    private readonly boardService: BoardService,
     private readonly stateService: StateService,
     private readonly taskService: TaskService,
     private readonly fb: FormBuilder,
@@ -112,20 +84,16 @@ export class BoardPageComponent implements OnInit, OnDestroy {
   private updateCreateTaskSub?: Subscription;
   private updateCreateStatusSub?: Subscription;
   private boardSub?: Subscription;
-  private updateBoardSub?: Subscription;
   ngOnInit(): void {
     this.boardSub = this.board$.subscribe(board => this.boardForm.patchValue({
-      title: board?.title,
+      title: board?.data.title,
     }));
     this.updateCreateTaskSub = this.updateCreateTask$.subscribe();
-    this.updateCreateStatusSub = this.updateCreateStatus$.subscribe();
-    this.updateBoardSub = this.updateBoard$.subscribe();
   }
 
   ngOnDestroy(): void {
     this.updateCreateTaskSub?.unsubscribe();
     this.updateCreateStatusSub?.unsubscribe();
     this.boardSub?.unsubscribe();
-    this.updateBoardSub?.unsubscribe();
   }
 }

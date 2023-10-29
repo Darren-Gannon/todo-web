@@ -1,5 +1,50 @@
+@import '/src/import-styles.scss';
+
 mat-drawer-container {
     min-height: 100vh;
     display: grid;
     grid-template-rows: min-content auto;
+}
+
+#drawer {
+    width: 20vw;
+}
+
+#navbar {
+    @extend .container;
+    @extend .unstyle-a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#navbar #logo {
+    @extend .gap-sm;
+    text-decoration: unset;
+    color: unset;
+    display: flex;
+    align-items: center;
+}
+
+.stale[mat-list-item] .text {
+    @extend .skeleton;
+    display: block;
+    height: 1rem;
+    width: 5rem;
+    border-radius: 5px;
+}
+
+#notifications-menu {
+    max-height: 15rem;
+    overflow-y: auto;
+
+    .notification-container {
+        text-decoration: none;
+        color: unset;
+
+        .notification-link {
+            display: flex;
+            align-items: center;
+        }
+    }
 }

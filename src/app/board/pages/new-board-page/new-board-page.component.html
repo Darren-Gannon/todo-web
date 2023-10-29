@@ -1,27 +1,68 @@
-<form action="" [formGroup]="boardForm">
-    <p>
-        <mat-card class="col-xs-offset-3 col-xs-6">
-            <mat-card-header>
-                <mat-card-title>
-                    <h2>New project board</h2>
-                </mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <div class="row">
-                    <mat-form-field class="col-xs-12">
+<ng-container *ngIf="{
+    submitBoardStatePerc: submitBoardStatePerc$ | async,
+    addState: addState$ | async,
+    removeState: removeState$ | async,
+    submitBoard: submitBoard$ | async,
+} as vm">
+    <form id="board-form" (ngSubmit)="boardForm.valid && submitBoardEmitter.next(boardForm.value)"
+        [formGroup]="boardForm">
+        <mat-vertical-stepper #stepper>
+            <mat-step>
+                <ng-template matStepLabel>Title</ng-template>
+                <div id="board-title-container">
+                    <mat-form-field>
                         <mat-label>Project Name</mat-label>
                         <input matInput formControlName="title">
                     </mat-form-field>
-                </div>
-            </mat-card-content>
-            <mat-card-actions>
-                <div class="container">
-                    <div class="row">
-                        <button type="button" class="col-xs-12 col-sm-5" mat-stroked-button color="warn" routerLink="..">Cancel</button>
-                        <button type="button" class="col-xs-12 col-sm-offset-2 col-sm-5" mat-raised-button color="primary" [disabled]="boardForm.touched && boardForm.invalid" (click)="boardForm.valid && createBoard(boardForm.value)">Create</button>
+                    <div class="action-bar">
+                        <button mat-stroked-button type="button" color="warn" routerLink="..">Cancel</button>
+                        <button mat-raised-button type="button" color="primary" matStepperNext
+                            [disabled]="boardForm.invalid">Next</button>
                     </div>
                 </div>
-            </mat-card-actions>
-        </mat-card>
-    </p>
-</form>
+            </mat-step>
+            <mat-step optional>
+                <ng-template matStepLabel>States</ng-template>
+                <ng-container formArrayName="states">
+                    <div id="states-form-container">
+                        <ng-container *ngFor="let states of states.controls; let i = index">
+                            <div class="state-name-container">
+                                <mat-form-field>
+                                    <mat-label>State Name</mat-label>
+                                    <input matInput [formControlName]="i">
+                                </mat-form-field>
+                                <button mat-icon-button type="button" color="warn" (click)="removeStateEmitter.next(i)">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
+                        </ng-container>
+                        <button mat-raised-button type="button" color="accent" (click)="addStateEmitter.next()">Add
+                            State</button>
+                        <div class="action-bar">
+                            <button mat-stroked-button type="button" color="warn" matStepperPrevious>Back</button>
+                            <button mat-raised-button type="button" color="accent" matStepperNext>Next</button>
+                        </div>
+                    </div>
+                </ng-container>
+            </mat-step>
+            <mat-step>
+                <ng-template matStepLabel>Complete</ng-template>
+
+                <div id="create-board-container">
+                    <ng-container *ngIf="!vm.submitBoardStatePerc; else submitBoardStateTmpl">
+
+                        <button mat-raised-button type="submit" color="accent" matStepperNext>Create</button>
+                    
+                    </ng-container>
+                    <ng-template #submitBoardStateTmpl>
+                        
+                        <mat-spinner
+                            [mode]="[1, 100].includes(vm.submitBoardStatePerc!)  ? 'indeterminate' : 'determinate'"
+                            diameter="50" [value]="vm.submitBoardStatePerc"></mat-spinner>
+
+                    </ng-template>
+                </div>
+            </mat-step>
+        </mat-vertical-stepper>
+    </form>
+</ng-container>

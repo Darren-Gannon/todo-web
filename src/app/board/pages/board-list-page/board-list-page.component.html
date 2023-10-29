@@ -1,20 +1,23 @@
-<div class="container">
-    <div class="row">
-        <p id="board-container" class="row" style="align-items: stretch; display: flex; flex-wrap: wrap;">
-            <ng-container *ngIf="boards$ | async as boards; else loadingTmpl">
-                <button mat-raised-button color="accent" class="board col-xs-12 col-sm-4 col-md-3" routerLink="new">Create</button>
-                <div class="board col-xs-12 col-sm-4 col-md-3" *ngFor="let board of boards">
-                    <a [routerLink]="board.id" style="color: unset; text-decoration: unset;">
-                        <mat-card matRipple class="row">
-                            <div class="col-xs-12" style="display: flex; flex-direction: row;">
-                                <h2 style="display: inline-block;">{{ board.title }}</h2>
-                            </div>
-                        </mat-card>
-                    </a>
+<div id="board-list-container">
+    <ng-container *ngIf="boards$ | async as boards; else loadingTmpl">
+        <ng-container *ngIf="boards.stale; else createBoardTmpl">
+            <a mat-raised-button class="board stale">
+                <h2 class="board-title"></h2>
+            </a>
+        </ng-container>
+        <ng-template #createBoardTmpl>
+            <a mat-raised-button color="accent" class="board" routerLink="new">
+                <div>
+                    <h2>Create</h2>
                 </div>
-            </ng-container>
-        </p>
-    </div>
+            </a>
+        </ng-template>
+        <ng-container *ngFor="let board of boards.data">
+            <a mat-raised-button class="board" [routerLink]="board.data.id">
+                <h2 class="board-title">{{ board.data.title }}</h2>
+            </a>
+        </ng-container>
+    </ng-container>
 </div>
 <ng-template #loadingTmpl>
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>

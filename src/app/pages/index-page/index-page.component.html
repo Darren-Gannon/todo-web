@@ -1,17 +1,13 @@
 <mat-toolbar color="primary">
-    <div class="container">
-        <div class="row" style="align-items: center; display: flex;">
-            <a routerLink="/" style="align-items: center; display: flex; color: unset; text-decoration: unset; gap: 1vw;">
-                <img src="assets/favicon.ico" alt="logo">
-                <h1 style="display: inline;">TODO</h1>
-            </a>
-            <span style="flex-grow: 1;"></span>
-            <button mat-raised-button color="accent" class="col-xs-1" (click)="authService.loginWithRedirect()">Sign In</button>
-        </div>
+    <div id="navbar">
+        <a routerLink="/" id="logo">
+            <img src="assets/redketchup/favicon-32x32.png" alt="logo">
+        </a>
+        <button mat-raised-button color="accent" (click)="authService.loginWithRedirect()">Sign In</button>
     </div>
 </mat-toolbar>
 <div class="container">
-    <div class="row">
-        App
-    </div>
+    <p>
+        <span>App</span>
+    </p>
 </div>

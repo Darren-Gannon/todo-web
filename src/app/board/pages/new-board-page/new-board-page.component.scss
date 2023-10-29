@@ -1,0 +1,59 @@
+@import '/src/import-styles.scss';
+
+#board-form {
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+    margin-left: auto;
+    margin-right: auto;
+    width: 400px;
+}
+
+#board-form-content {
+    display: flex;
+    flex-direction: column;
+    @extend .padding-sm-top;
+    @extend .padding-sm-bottom;
+    @extend .gap-sm;
+    justify-content: center;
+}
+
+.action-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+#board-title-container,
+#states-form-container {
+    display: flex;
+    flex-direction: column;
+    @extend .padding-sm-top;
+    @extend .gap-sm;
+}
+
+.state-name-container {
+    display: flex;
+    flex-direction: row;
+    @extend .gap-sm;
+
+    > mat-form-field {
+        flex-grow: 1;
+    }
+}
+
+#create-board-container {
+    display: flex;
+    justify-content: center;
+}
+
+.user-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#user-form-container {
+    display: flex;
+    flex-direction: column;
+}

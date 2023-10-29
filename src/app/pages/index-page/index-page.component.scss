@@ -1,0 +1,15 @@
+@import '/src/import-styles.scss';
+
+#navbar {
+    @extend .container;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    & > #logo {
+        @extend .gap-sm;
+        @extend .unstyle-a;
+        display: flex;
+        align-items: center;
+    }
+}

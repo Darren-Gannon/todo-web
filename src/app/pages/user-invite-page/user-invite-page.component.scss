@@ -1,0 +1,6 @@
+@import '/src/import-styles.scss';
+
+#invite-container {
+    @extend .margin-sm-top;
+    @extend .container;
+}

@@ -1,8 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Task } from '../../../../../api/task';
 import { FormBuilder, Validators } from '@angular/forms';
-import { State } from '../../../../../api';
+import { State, Task, CachedResult } from '../../../../../api';
 
 @Component({
   selector: 'app-task-dialog',
@@ -10,6 +9,8 @@ import { State } from '../../../../../api';
   styleUrls: ['./task-dialog.component.scss']
 })
 export class TaskDialogComponent implements OnInit {
+
+  public confirm = confirm;
 
   public readonly taskForm = this.fb.group({
     title: this.fb.control('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] }),
@@ -27,16 +28,20 @@ export class TaskDialogComponent implements OnInit {
     this.taskForm.patchValue({
       title: this.data.task?.title,
       description: this.data.task?.description,
-      stateId: this.data.task?.stateId,
+      stateId: this.data.task?.stateId ?? this.data.state.id,
     });
   }
 }
 
 export interface TaskDialogData {
   task?: Task;
-  states: State[];
+  states: CachedResult<State>[];
+  state: State;
 }
 
-export interface TaskDialogResult {
+export type TaskDialogResult = {
+  action: 'submit'
   task: Pick<Task, 'title' | 'description' | 'stateId'>;
+} | {
+  action: 'delete'
 }

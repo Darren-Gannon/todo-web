@@ -1,0 +1,102 @@
+.light-gray-text {
+    color: #eeeeee;
+}
+
+.gray-text {
+    color: #cccccc;
+}
+
+.dark-gray-text {
+    color: #888888;
+}
+
+.container {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media only screen and (width <= 425px) {
+    .container {
+        width: 100%;
+    }
+}
+
+@media only screen and (425px <= width <= 600px) {
+    .container {
+        width: 425px;
+    }
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (600px <= width <= 768px) {
+    .container {
+        width: 600px;
+    }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (768px <= width <= 992px) {
+    .container {
+        width: 768px;
+    }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (992px <= width <= 1200px) {
+    .container {
+        width: 992px;
+    }
+}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (1200px <= width) {
+    .container {
+        width: 1200px;
+    }
+}
+
+$scales: (sm: .25rem, md: .5rem, lg: 1rem);
+$directions: top, bottom, left, right;
+@each $scale, $size in $scales {
+
+
+    @each $direction in $directions {
+        .margin-#{$scale}-#{$direction} {
+            margin-#{$direction}: $size;
+        }
+        .padding-#{$scale}-#{$direction} {
+            padding-#{$direction}: $size;
+        }
+    }
+
+    .gap-#{$scale} {
+        gap: $size;
+    }
+
+    .margin-#{$scale} {
+        margin: $size;
+    }
+
+    .padding-#{$scale} {
+        padding: $size;
+    }
+}
+
+a.unstyle-a {
+    color: unset;
+    text-decoration: unset;
+}
+
+.skeleton {
+    animation: skeleton-loading 1s linear infinite alternate;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-color: hsl(200, 20%, 80%);
+    }
+
+    100% {
+        background-color: hsl(200, 20%, 95%);
+    }
+}

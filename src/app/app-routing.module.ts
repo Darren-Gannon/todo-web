@@ -5,6 +5,9 @@ import { map } from 'rxjs';
 import { AccountPageComponent } from './pages/account-page/account-page.component';
 import { AppPageComponent } from './pages/app-page/app-page.component';
 import { IndexPageComponent } from './pages/index-page/index-page.component';
+import { NotificationListPageComponent } from './pages/notification-list-page/notification-list-page.component';
+import { NotificationPageComponent } from './pages/notification-page/notification-page.component';
+import { UserInvitePageComponent } from './pages/user-invite-page/user-invite-page.component';
 
 @Injectable({
   providedIn: 'root'
@@ -43,6 +46,13 @@ const routes: Routes = [
   { path: '', canActivate: [isSignedOut], pathMatch: 'full', component: IndexPageComponent },
   { path: 'app', canActivate: [isSignedIn], component: AppPageComponent, children: [
     { path: 'account', component: AccountPageComponent },
+    { path: 'notification', children: [
+      { path: ':notification_id', component: NotificationPageComponent },
+      { path: '', pathMatch: 'full', component: NotificationListPageComponent },
+    ] },
+    { path: 'invite', children: [
+      { path: ':invite_id', component: UserInvitePageComponent },
+    ] },
     { path: 'board', loadChildren: () => import('./board/board.module').then(m => m.BoardModule) },
     { path: '', pathMatch: 'full', redirectTo: 'board' },
   ] },

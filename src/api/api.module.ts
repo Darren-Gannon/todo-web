@@ -2,17 +2,22 @@ import { ModuleWithProviders, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Config } from './config';
 import { BoardService } from './board';
-import { TaskService } from './task';
-import { StateService } from './state';
-import { HttpClientModule } from '@angular/common/http';
+import { TaskService } from './board/task';
+import { StateService } from './board/state';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
 import { BoardsReducer } from './board/ngrx/board.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { BoardEffects } from './board/ngrx/board.effects';
-import { StatesEffects } from './state/ngrx/state.effects';
-import { StatesReducer } from './state/ngrx/state.reducer';
-import { TaskEffects } from './task/ngrx/task.effects';
-import { TaskReducer } from './task/ngrx/task.reducer';
+import { StatesEffects } from './board/state/ngrx/state.effects';
+import { StatesReducer } from './board/state/ngrx/state.reducer';
+import { TaskEffects } from './board/task/ngrx/task.effects';
+import { TaskReducer } from './board/task/ngrx/task.reducer';
+import { AuthInterceptor } from './auth.interceptor';
+import { UserService } from './user';
+import { BoardUserService } from './board/board-user';
+import { NotificationService } from './notification/notification.service';
+import { UserInviteService } from './board/user-invite/user-invite.service';
 
 @NgModule({
   declarations: [],
@@ -28,6 +33,11 @@ import { TaskReducer } from './task/ngrx/task.reducer';
     BoardService,
     StateService,
     TaskService,
+    UserService,
+    BoardUserService,
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    NotificationService,
+    UserInviteService,
   ],
 })
 export class ApiModule {
