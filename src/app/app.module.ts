@@ -26,6 +26,7 @@ import { NotificationListPageComponent } from './pages/notification-list-page/no
 import { NotificationPageComponent } from './pages/notification-page/notification-page.component';
 import { MatBadgeModule } from '@angular/material/badge';
 import { UserInvitePageComponent } from './pages/user-invite-page/user-invite-page.component';
+import { environment } from 'src/environments/environment';
 
 @NgModule({
   declarations: [
@@ -43,7 +44,7 @@ import { UserInvitePageComponent } from './pages/user-invite-page/user-invite-pa
     AppRoutingModule,
     BrowserAnimationsModule,
     ApiModule.forRoot({
-      apiUrl: 'http://localhost:3000',
+      apiUrl: environment.apiUrl,
     }),
     MatToolbarModule,
     MatButtonModule,
@@ -54,11 +55,11 @@ import { UserInvitePageComponent } from './pages/user-invite-page/user-invite-pa
     MatListModule,
     MatBadgeModule,
     AuthModule.forRoot({
-      domain: 'cortex-todo.us.auth0.com',
-      clientId: 'empJeIxteS3FnsHr4958Kl5nHQmPxSrx',
+      domain: environment.auth0.domain,
+      clientId: environment.auth0.clientId,
       authorizationParams: {
         redirect_uri: window.location.origin,
-        audience: 'http://localhost:3000',
+        audience: environment.auth0.audience,
       }
     }),
     StoreModule.forRoot({}, {}),
