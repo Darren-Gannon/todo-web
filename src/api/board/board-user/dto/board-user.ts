@@ -1,4 +1,4 @@
-import { Board } from "../../board";
+import { Board } from "../../dto/board.dto";
 import { UserRole } from "./user-role.enum";
 
 export interface BoardUser {

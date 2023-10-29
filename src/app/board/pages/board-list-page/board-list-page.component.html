@@ -1,24 +1,23 @@
-<div id="board-list-container">
-    <ng-container *ngIf="boards$ | async as boards; else loadingTmpl">
-        <ng-container *ngIf="boards.stale; else createBoardTmpl">
-            <a mat-raised-button class="board stale">
-                <h2 class="board-title"></h2>
-            </a>
+<ng-container *ngIf="{
+    boards: boards$ | async,
+} as vm">
+    <ng-container *ngIf="vm.boards as boards">
+        <ng-container *ngIf="boards.loading">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         </ng-container>
-        <ng-template #createBoardTmpl>
-            <a mat-raised-button color="accent" class="board" routerLink="new">
-                <div>
-                    <h2>Create</h2>
-                </div>
-            </a>
-        </ng-template>
-        <ng-container *ngFor="let board of boards.data">
-            <a mat-raised-button class="board" [routerLink]="board.data.id">
-                <h2 class="board-title">{{ board.data.title }}</h2>
-            </a>
+        <ng-container *ngIf="boards.loaded">
+            <div id="board-list-container">
+                <a mat-raised-button color="accent" class="board" routerLink="new">
+                    <div>
+                        <h2>Create</h2>
+                    </div>
+                </a>
+                <ng-container *ngFor="let board of Object.values(boards.data!)">
+                    <a mat-raised-button class="board" [routerLink]="board.data!.id">
+                        <h2 class="board-title">{{ board.data!.title }}</h2>
+                    </a>
+                </ng-container>
+            </div>
         </ng-container>
     </ng-container>
-</div>
-<ng-template #loadingTmpl>
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-</ng-template>
+</ng-container>

@@ -1,4 +1,4 @@
-import { Board } from "../board";
+import { Board } from "../dto/board.dto";
 import { State } from "../state";
 
 export interface Task {

@@ -6,9 +6,7 @@ import { TaskService } from './board/task';
 import { StateService } from './board/state';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
-import { BoardsReducer } from './board/ngrx/board.reducer';
 import { EffectsModule } from '@ngrx/effects';
-import { BoardEffects } from './board/ngrx/board.effects';
 import { StatesEffects } from './board/state/ngrx/state.effects';
 import { StatesReducer } from './board/state/ngrx/state.reducer';
 import { TaskEffects } from './board/task/ngrx/task.effects';
@@ -24,10 +22,9 @@ import { UserInviteService } from './board/user-invite/user-invite.service';
   imports: [
     CommonModule,
     HttpClientModule,
-    StoreModule.forFeature('boards', BoardsReducer),
     StoreModule.forFeature('states', StatesReducer),
     StoreModule.forFeature('tasks', TaskReducer),
-    EffectsModule.forFeature(BoardEffects, StatesEffects, TaskEffects),
+    EffectsModule.forFeature(StatesEffects, TaskEffects),
   ],
   providers: [
     BoardService,

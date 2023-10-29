@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
+import { map, share } from 'rxjs';
 import { BoardService } from '../../../api';
 import { Notification, NotificationService } from '../../../api/notification';
 import { NotificationType } from '../../../api/notification/dto/notification-type.enum';
-import { Observable, map, share, tap } from 'rxjs';
-import { UserInviteService } from '../../../api/board/user-invite/user-invite.service';
 
 @Component({
   selector: 'app-app-page',
@@ -12,6 +11,8 @@ import { UserInviteService } from '../../../api/board/user-invite/user-invite.se
   styleUrls: ['./app-page.component.scss']
 })
 export class AppPageComponent {
+
+  public readonly Object = Object;
 
   public readonly boards$ = this.boardService.find();
   public readonly notifications$ = this.notificationService.findAll().pipe(

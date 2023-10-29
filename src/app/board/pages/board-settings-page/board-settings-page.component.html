@@ -8,222 +8,236 @@
     inviteUser: inviteUser$ | async,
     userInvites: userInvites$ | async
 } as vm">
-    <ng-container *ngIf="vm.board as board; else loadingTmpl">
-        <div id="board-settings-container">
-            <mat-card id="settings-page-header">
-                <button routerLink=".." mat-icon-button color="primary">
-                    <mat-icon>arrow_back</mat-icon>
-                </button>
-                <ng-container *ngIf="{ editing: false } as boardVm">
-                    <ng-container *ngIf="!boardVm.editing; else editBoardTmpl">
-                        <h2>{{ board.data.title }}</h2>
-                        <ng-container *ngIf="!board.stale">
-                            <button mat-icon-button color="accent" (click)="boardVm.editing = true">
-                                <mat-icon>edit</mat-icon>
-                            </button>
-                        </ng-container>
-                    </ng-container>
-                    <ng-template #editBoardTmpl>
-                        <ng-container *ngIf="vm.boardTitleCtrl">
-                            <mat-form-field>
-                                <input matInput type="text" [formControl]="vm.boardTitleCtrl">
-                                <button [disabled]="vm.boardTitleCtrl.invalid" type="submit" matSuffix mat-icon-button
-                                    color="primary"
-                                    (click)="vm.boardTitleCtrl.valid && editBoard(board.data, { title: vm.boardTitleCtrl.value }); vm.boardTitleCtrl.reset(); boardVm.editing = false;">
-                                    <mat-icon>check</mat-icon>
+    <ng-container *ngIf="vm.board as board">
+        <ng-container *ngIf="board.loading" [ngTemplateOutlet]="loadingTmpl"></ng-container>
+        <ng-container *ngIf="board.loaded">
+            <div id="board-settings-container">
+                <mat-card id="settings-page-header">
+                    <button routerLink=".." mat-icon-button color="primary">
+                        <mat-icon>arrow_back</mat-icon>
+                    </button>
+                    <ng-container *ngIf="{ editing: false } as boardVm">
+                        <ng-container *ngIf="!boardVm.editing; else editBoardTmpl">
+                            <h2>{{ board.data!.title }}</h2>
+                            <ng-container *ngIf="!board.updating || !board.deleting || !board.loading">
+                                <button mat-icon-button color="accent" (click)="boardVm.editing = true">
+                                    <mat-icon>edit</mat-icon>
                                 </button>
-                                <button type="button" matSuffix mat-icon-button color="warn"
-                                    (click)="vm.boardTitleCtrl.reset(); boardVm.editing = false;">
-                                    <mat-icon>cancel</mat-icon>
-                                </button>
-                            </mat-form-field>
-                        </ng-container>
-                    </ng-template>
-                </ng-container>
-            </mat-card>
-            <div id="settings-and-user-container">
-                <div id="state-container">
-                    <mat-card id="state-list-container">
-                        <ng-container *ngIf="vm.states as states;">
-                            <mat-action-list role="list">
-                                <ng-container *ngFor="let state of states.data; let i = index">
-                                    <ng-container *ngIf="{ editing: false, ctrl: vm.statesCtrls![i] } as stateVm">
-                                        <ng-container *ngIf="!stateVm.editing; else editStateTmpl">
-                                            <mat-list-item role="listitem">
-                                                <div class="state-list-item">
-                                                    <span class="state-list-item-title">{{ state.data.title }}</span>
-                                                    <ng-container *ngIf="!state.stale; else loadingTmpl">
-                                                        <div class="state-list-item-actions">
-                                                            <button mat-icon-button color="accent"
-                                                                (click)="stateVm.editing = true">
-                                                                <mat-icon>edit</mat-icon>
-                                                            </button>
-                                                            <button mat-icon-button color="warn"
-                                                                (click)="deleteState(board.data, state.data)">
-                                                                <mat-icon>delete</mat-icon>
-                                                            </button>
-                                                        </div>
-                                                    </ng-container>
-                                                </div>
-                                            </mat-list-item>
-                                        </ng-container>
-                                        <ng-template #editStateTmpl>
-                                            <mat-list-item style="height: 4rem;" role="listitem">
-                                                <mat-form-field style="width: 100%;">
-                                                    <input matInput type="text" [formControl]="stateVm.ctrl">
-                                                    <button [disabled]="stateVm.ctrl.invalid" type="submit" matSuffix
-                                                        mat-icon-button color="primary"
-                                                        (click)="stateVm.ctrl.valid && editState(board.data, state.data, { title: stateVm.ctrl.value }); stateVm.ctrl.reset(); stateVm.editing = false;">
-                                                        <mat-icon>check</mat-icon>
-                                                    </button>
-                                                    <button type="button" matSuffix mat-icon-button color="warn"
-                                                        (click)="stateVm.ctrl.reset(); stateVm.editing = false;">
-                                                        <mat-icon>cancel</mat-icon>
-                                                    </button>
-                                                </mat-form-field>
-                                            </mat-list-item>
-                                        </ng-template>
-                                    </ng-container>
-                                </ng-container>
-                                <ng-container *ngIf="states.stale; else newStateTmpl">
-                                    <mat-list-item role="listitem">
-                                        <div class="state-list-item stale">
-                                            <span class="state-list-item-title"></span>
-                                        </div>
-                                    </mat-list-item>
-                                </ng-container>
-                                <ng-template #newStateTmpl>
-                                    <ng-container *ngIf="{ editing: false } as addingStateVm">
-                                        <ng-container *ngIf="!addingStateVm.editing; else addStateTmpl">
-                                            <mat-list-item role="listitem" (click)="addingStateVm.editing = true;">
-                                                <div class="state-list-item new">
-                                                    <mat-icon color="accent">add</mat-icon>
-                                                </div>
-                                            </mat-list-item>
-                                        </ng-container>
-                                        <ng-template #addStateTmpl>
-                                            <form>
-                                                <mat-form-field style="width: 100%;">
-                                                    <input [formControl]="newStateTitle" matInput type="text"
-                                                        placeholder="State">
-                                                    <button [disabled]="newStateTitle.invalid" type="submit" matSuffix
-                                                        mat-icon-button color="primary"
-                                                        (click)="newStateTitle.valid && createState(board.data, { title: newStateTitle.value }); newStateTitle.reset(); addingStateVm.editing = false;">
-                                                        <mat-icon>check</mat-icon>
-                                                    </button>
-                                                    <button type="button" matSuffix mat-icon-button color="warn"
-                                                        (click)="newStateTitle.reset(); addingStateVm.editing = false;">
-                                                        <mat-icon>cancel</mat-icon>
-                                                    </button>
-                                                </mat-form-field>
-                                            </form>
-                                        </ng-template>
-                                    </ng-container>
-                                </ng-template>
-                            </mat-action-list>
-                        </ng-container>
-                    </mat-card>
-                </div>
-
-                <div id="user-container">
-                    <ng-container *ngIf="vm.boardUsers as boardUsers">
-                        <mat-card id="user-list-container">
-                            <ng-container *ngFor="let user of boardUsers">
-                                <div class="member-container">
-                                    <img class="member-picture" [src]="user.picture"
-                                        onerror="this.src='assets/images/default-profile-image.svg';">
-                                    <span class="member-name">{{ user.name }}</span>
-                                    <span class="member-email">{{ user.email }}</span>
-                                    <span class="member-role">
-                                        <button mat-button [matMenuTriggerFor]="roleMenu">{{ user.role | titlecase }}</button>
-                                        <mat-menu #roleMenu="matMenu">
-                                            <button mat-menu-item [disabled]="user.role == UserRole.ADMIN">Admin</button>
-                                            <button mat-menu-item [disabled]="user.role == UserRole.MEMBER">Member</button>
-                                            <button mat-menu-item [disabled]="user.role == UserRole.SPECTATOR">Spectator</button>
-                                        </mat-menu>
-                                    </span>
-                                    <div class="trash-can">
-                                        <button mat-icon-button color="warn">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
-                                    </div>
-                                </div>
                             </ng-container>
-                            
+                        </ng-container>
+                        <ng-template #editBoardTmpl>
+                            <ng-container *ngIf="vm.boardTitleCtrl">
+                                <mat-form-field>
+                                    <input matInput type="text" [formControl]="vm.boardTitleCtrl">
+                                    <button [disabled]="vm.boardTitleCtrl.invalid" type="submit" matSuffix
+                                        mat-icon-button color="primary"
+                                        (click)="vm.boardTitleCtrl.valid && editBoard(board.data!, { title: vm.boardTitleCtrl.value }); vm.boardTitleCtrl.reset(); boardVm.editing = false;">
+                                        <mat-icon>check</mat-icon>
+                                    </button>
+                                    <button type="button" matSuffix mat-icon-button color="warn"
+                                        (click)="vm.boardTitleCtrl.reset(); boardVm.editing = false;">
+                                        <mat-icon>cancel</mat-icon>
+                                    </button>
+                                </mat-form-field>
+                            </ng-container>
+                        </ng-template>
+                    </ng-container>
+                </mat-card>
+                <div id="settings-and-user-container">
+                    <div id="state-container">
+                        <mat-card id="state-list-container">
+                            <ng-container *ngIf="vm.states as states;">
+                                <mat-action-list role="list">
+                                    <ng-container *ngFor="let state of states.data; let i = index">
+                                        <ng-container *ngIf="{ editing: false, ctrl: vm.statesCtrls![i] } as stateVm">
+                                            <ng-container *ngIf="!stateVm.editing; else editStateTmpl">
+                                                <mat-list-item role="listitem">
+                                                    <div class="state-list-item">
+                                                        <span class="state-list-item-title">{{ state.data.title
+                                                            }}</span>
+                                                        <ng-container *ngIf="!state.stale; else loadingTmpl">
+                                                            <div class="state-list-item-actions">
+                                                                <button mat-icon-button color="accent"
+                                                                    (click)="stateVm.editing = true">
+                                                                    <mat-icon>edit</mat-icon>
+                                                                </button>
+                                                                <button mat-icon-button color="warn"
+                                                                    (click)="deleteState(board.data!, state.data)">
+                                                                    <mat-icon>delete</mat-icon>
+                                                                </button>
+                                                            </div>
+                                                        </ng-container>
+                                                    </div>
+                                                </mat-list-item>
+                                            </ng-container>
+                                            <ng-template #editStateTmpl>
+                                                <mat-list-item style="height: 4rem;" role="listitem">
+                                                    <mat-form-field style="width: 100%;">
+                                                        <input matInput type="text" [formControl]="stateVm.ctrl">
+                                                        <button [disabled]="stateVm.ctrl.invalid" type="submit"
+                                                            matSuffix mat-icon-button color="primary"
+                                                            (click)="stateVm.ctrl.valid && editState(board.data!, state.data, { title: stateVm.ctrl.value }); stateVm.ctrl.reset(); stateVm.editing = false;">
+                                                            <mat-icon>check</mat-icon>
+                                                        </button>
+                                                        <button type="button" matSuffix mat-icon-button color="warn"
+                                                            (click)="stateVm.ctrl.reset(); stateVm.editing = false;">
+                                                            <mat-icon>cancel</mat-icon>
+                                                        </button>
+                                                    </mat-form-field>
+                                                </mat-list-item>
+                                            </ng-template>
+                                        </ng-container>
+                                    </ng-container>
+                                    <ng-container *ngIf="states.stale; else newStateTmpl">
+                                        <mat-list-item role="listitem">
+                                            <div class="state-list-item stale">
+                                                <span class="state-list-item-title"></span>
+                                            </div>
+                                        </mat-list-item>
+                                    </ng-container>
+                                    <ng-template #newStateTmpl>
+                                        <ng-container *ngIf="{ editing: false } as addingStateVm">
+                                            <ng-container *ngIf="!addingStateVm.editing; else addStateTmpl">
+                                                <mat-list-item role="listitem" (click)="addingStateVm.editing = true;">
+                                                    <div class="state-list-item new">
+                                                        <mat-icon color="accent">add</mat-icon>
+                                                    </div>
+                                                </mat-list-item>
+                                            </ng-container>
+                                            <ng-template #addStateTmpl>
+                                                <form>
+                                                    <mat-form-field style="width: 100%;">
+                                                        <input [formControl]="newStateTitle" matInput type="text"
+                                                            placeholder="State">
+                                                        <button [disabled]="newStateTitle.invalid" type="submit"
+                                                            matSuffix mat-icon-button color="primary"
+                                                            (click)="newStateTitle.valid && createState(board.data!, { title: newStateTitle.value }); newStateTitle.reset(); addingStateVm.editing = false;">
+                                                            <mat-icon>check</mat-icon>
+                                                        </button>
+                                                        <button type="button" matSuffix mat-icon-button color="warn"
+                                                            (click)="newStateTitle.reset(); addingStateVm.editing = false;">
+                                                            <mat-icon>cancel</mat-icon>
+                                                        </button>
+                                                    </mat-form-field>
+                                                </form>
+                                            </ng-template>
+                                        </ng-container>
+                                    </ng-template>
+                                </mat-action-list>
+                            </ng-container>
                         </mat-card>
-                    </ng-container>
+                    </div>
 
-                    <mat-card id="invite-list-container">
-                        <ng-container *ngIf="vm.userInvites as userInvites">
-                            <ng-container *ngFor="let invite of userInvites">
-                                <div class="invite-container">
-                                    <img class="member-picture" src="assets/images/invite-{{ invite.role.toLowerCase() }}-profile-image.svg">
-                                    <span class="member-email">{{ invite.email }}</span>
-                                    <span class="member-role">
-                                        <button mat-button [matMenuTriggerFor]="roleMenu">{{ invite.role | titlecase }}</button>
-                                        <mat-menu #roleMenu="matMenu">
-                                            <button mat-menu-item [disabled]="invite.role == UserRole.ADMIN" (click)="updateInviteRole(board.data, invite, UserRole.ADMIN)">Admin</button>
-                                            <button mat-menu-item [disabled]="invite.role == UserRole.MEMBER" (click)="updateInviteRole(board.data, invite, UserRole.MEMBER)">Member</button>
-                                            <button mat-menu-item [disabled]="invite.role == UserRole.SPECTATOR" (click)="updateInviteRole(board.data, invite, UserRole.SPECTATOR)">Spectator</button>
-                                        </mat-menu>
-                                    </span>
-                                    <div class="trash-can">
-                                        <button mat-icon-button color="warn" (click)="deleteInvite(board.data, invite)">
-                                            <mat-icon>delete</mat-icon>
-                                        </button>
+                    <div id="user-container">
+                        <ng-container *ngIf="vm.boardUsers as boardUsers">
+                            <mat-card id="user-list-container">
+                                <ng-container *ngFor="let user of boardUsers">
+                                    <div class="member-container">
+                                        <img class="member-picture" [src]="user.picture"
+                                            onerror="this.src='assets/images/default-profile-image.svg';">
+                                        <span class="member-name">{{ user.name }}</span>
+                                        <span class="member-email">{{ user.email }}</span>
+                                        <span class="member-role">
+                                            <button mat-button [matMenuTriggerFor]="roleMenu">{{ user.role | titlecase
+                                                }}</button>
+                                            <mat-menu #roleMenu="matMenu">
+                                                <button mat-menu-item
+                                                    [disabled]="user.role == UserRole.ADMIN">Admin</button>
+                                                <button mat-menu-item
+                                                    [disabled]="user.role == UserRole.MEMBER">Member</button>
+                                                <button mat-menu-item
+                                                    [disabled]="user.role == UserRole.SPECTATOR">Spectator</button>
+                                            </mat-menu>
+                                        </span>
+                                        <div class="trash-can">
+                                            <button mat-icon-button color="warn">
+                                                <mat-icon>delete</mat-icon>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            </ng-container>
+                                </ng-container>
+
+                            </mat-card>
                         </ng-container>
-                        <ng-container *ngIf="{ inviting: false } as inviteUserVm">
-                            <ng-container *ngIf="!inviteUserVm.inviting; else inviteUserTmpl">
-                                <button mat-raised-button color="accent"
-                                    (click)="inviteUserVm.inviting = true">Invite User</button>
-                            </ng-container>
-                            <ng-template #inviteUserTmpl>
-                                <form id="invite-user-container" [formGroup]="inviteUserForm"
-                                    (ngSubmit)="inviteUserForm.valid && inviteUserEmitter.next({ userForm: inviteUserForm.value, board: vm.board.data })">
-                                    <mat-form-field>
-                                        <mat-label>User Email</mat-label>
-                                        <input matInput type="text" formControlName="email"
-                                            [matAutocomplete]="auto">
-                                        <mat-autocomplete #auto="matAutocomplete">
-                                            <mat-option *ngFor="let user of filteredInviteUsers$ | async"
-                                                [value]="user.email">
-                                                {{ user.email }}
-                                            </mat-option>
-                                        </mat-autocomplete>
-                                    </mat-form-field>
-                                    <mat-form-field id="user-role">
-                                        <mat-label>User Role</mat-label>
-                                        <mat-select formControlName="role">
-                                            <mat-option [value]="UserRole.ADMIN">Admin</mat-option>
-                                            <mat-option [value]="UserRole.MEMBER">Member</mat-option>
-                                            <mat-option [value]="UserRole.SPECTATOR">Spectator</mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
-                                    <div id="invite-user-actions">
-                                        <button [disabled]="inviteUserForm.invalid" mat-icon-button color="accent"
-                                            type="submit">
-                                            <mat-icon>check</mat-icon>
-                                        </button>
-                                        <button mat-icon-button color="warn" type="button"
-                                            (click)="inviteUserVm.inviting = false; inviteUserForm.reset();">
-                                            <mat-icon>cancel_circle</mat-icon>
-                                        </button>
+
+                        <mat-card id="invite-list-container">
+                            <ng-container *ngIf="vm.userInvites as userInvites">
+                                <ng-container *ngFor="let invite of userInvites">
+                                    <div class="invite-container">
+                                        <img class="member-picture"
+                                            src="assets/images/invite-{{ invite.role.toLowerCase() }}-profile-image.svg">
+                                        <span class="member-email">{{ invite.email }}</span>
+                                        <span class="member-role">
+                                            <button mat-button [matMenuTriggerFor]="roleMenu">{{ invite.role | titlecase
+                                                }}</button>
+                                            <mat-menu #roleMenu="matMenu">
+                                                <button mat-menu-item [disabled]="invite.role == UserRole.ADMIN"
+                                                    (click)="updateInviteRole(board.data!, invite, UserRole.ADMIN)">Admin</button>
+                                                <button mat-menu-item [disabled]="invite.role == UserRole.MEMBER"
+                                                    (click)="updateInviteRole(board.data!, invite, UserRole.MEMBER)">Member</button>
+                                                <button mat-menu-item [disabled]="invite.role == UserRole.SPECTATOR"
+                                                    (click)="updateInviteRole(board.data!, invite, UserRole.SPECTATOR)">Spectator</button>
+                                            </mat-menu>
+                                        </span>
+                                        <div class="trash-can">
+                                            <button mat-icon-button color="warn"
+                                                (click)="deleteInvite(board.data!, invite)">
+                                                <mat-icon>delete</mat-icon>
+                                            </button>
+                                        </div>
                                     </div>
-                                </form>
-                            </ng-template>
-                        </ng-container>
-                    </mat-card>
+                                </ng-container>
+                            </ng-container>
+                            <ng-container *ngIf="{ inviting: false } as inviteUserVm">
+                                <ng-container *ngIf="!inviteUserVm.inviting; else inviteUserTmpl">
+                                    <button mat-raised-button color="accent"
+                                        (click)="inviteUserVm.inviting = true">Invite User</button>
+                                </ng-container>
+                                <ng-template #inviteUserTmpl>
+                                    <form id="invite-user-container" [formGroup]="inviteUserForm"
+                                        (ngSubmit)="inviteUserForm.valid && inviteUserEmitter.next({ userForm: inviteUserForm.value, board: board.data! })">
+                                        <mat-form-field>
+                                            <mat-label>User Email</mat-label>
+                                            <input matInput type="text" formControlName="email"
+                                                [matAutocomplete]="auto">
+                                            <mat-autocomplete #auto="matAutocomplete">
+                                                <mat-option *ngFor="let user of filteredInviteUsers$ | async"
+                                                    [value]="user.email">
+                                                    {{ user.email }}
+                                                </mat-option>
+                                            </mat-autocomplete>
+                                        </mat-form-field>
+                                        <mat-form-field id="user-role">
+                                            <mat-label>User Role</mat-label>
+                                            <mat-select formControlName="role">
+                                                <mat-option [value]="UserRole.ADMIN">Admin</mat-option>
+                                                <mat-option [value]="UserRole.MEMBER">Member</mat-option>
+                                                <mat-option [value]="UserRole.SPECTATOR">Spectator</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                        <div id="invite-user-actions">
+                                            <button [disabled]="inviteUserForm.invalid" mat-icon-button color="accent"
+                                                type="submit">
+                                                <mat-icon>check</mat-icon>
+                                            </button>
+                                            <button mat-icon-button color="warn" type="button"
+                                                (click)="inviteUserVm.inviting = false; inviteUserForm.reset();">
+                                                <mat-icon>cancel_circle</mat-icon>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </ng-template>
+                            </ng-container>
+                        </mat-card>
+                    </div>
+                </div>
+                <div id="delete-button-container">
+                    <hr>
+                    <button id="delete-button" [disabled]="board.updating || board.loading || board.deleting"
+                        mat-stroked-button color="warn" (click)="deleteBoard(board.data!)">Delete Board</button>
                 </div>
             </div>
-            <div id="delete-button-container">
-                <hr>
-                <button id="delete-button" [disabled]="board.stale" mat-stroked-button color="warn"
-                    (click)="deleteBoard(board.data)">Delete Board</button>
-            </div>
-        </div>
+        </ng-container>
     </ng-container>
 </ng-container>
 

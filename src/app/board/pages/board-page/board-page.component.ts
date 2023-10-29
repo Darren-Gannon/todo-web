@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, Subject, Subscription, map, mergeMap, switchMap, throwError } from 'rxjs';
+import { EMPTY, Subject, Subscription, map, mergeMap, share, switchMap, tap, throwError } from 'rxjs';
 import { Board, BoardService, State, StateService, Task, TaskService } from '../../../../api';
 import { CachedResult } from '../../../../api/cache-result';
 import { TaskDialogComponent, TaskDialogResult } from './task-dialog/task-dialog.component';
@@ -86,7 +86,7 @@ export class BoardPageComponent implements OnInit, OnDestroy {
   private boardSub?: Subscription;
   ngOnInit(): void {
     this.boardSub = this.board$.subscribe(board => this.boardForm.patchValue({
-      title: board?.data.title,
+      title: board?.data?.title,
     }));
     this.updateCreateTaskSub = this.updateCreateTask$.subscribe();
   }

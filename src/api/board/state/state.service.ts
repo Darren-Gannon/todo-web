@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, map, tap } from 'rxjs';
-import { Board } from '../board';
+import { Board } from '../dto/board.dto';
 import { Config } from '../../config';
 import * as StateActions from './ngrx/state.actions';
 import { StateState } from './ngrx/state.state';

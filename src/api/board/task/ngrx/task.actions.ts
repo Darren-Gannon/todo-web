@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { Task } from '../task';
-import { Board } from '../../board';
+import { Board } from '../../dto/board.dto';
 
 export const createTask = createAction('[Task] create', props<{ board: Pick<Board, 'id'>, task: Pick<Task, 'title' | 'description' | 'stateId'> }>());
 export const createdTask = createAction('[Task] created', props<{ board: Pick<Board, 'id'>, task: Task }>());
