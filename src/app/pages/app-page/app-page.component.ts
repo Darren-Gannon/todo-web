@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
-import { map, share } from 'rxjs';
+import { map, share, switchMap, timer } from 'rxjs';
 import { BoardService } from '../../../api';
-import { Notification, NotificationService } from '../../../api/notification';
+import { Notification, NotificationService, NotificationState } from '../../../api/notification';
 import { NotificationType } from '../../../api/notification/dto/notification-type.enum';
 
 @Component({
@@ -15,12 +15,17 @@ export class AppPageComponent {
   public readonly Object = Object;
 
   public readonly boards$ = this.boardService.find();
-  public readonly notifications$ = this.notificationService.findAll().pipe(
+  public readonly notifications$ = timer(1000 * 10).pipe(
+    switchMap(() => this.notificationService.findAll()),
     share(),
   );
   public readonly unreadNotifications$ = this.notifications$.pipe(
-    map(notifications => notifications.reduce((acc, notification) => !notification.read ? ++acc : acc, 0)),
+    map(notifications => Object.values(notifications.data).reduce((acc, notification) => !notification.data.read ? ++acc : acc, 0)),
   );
+
+  sortNotifications(notifications: NotificationState[]): NotificationState[] {
+    return notifications.sort((a, b) => new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime());
+  }
 
   constructor(
     public readonly authService: AuthService,

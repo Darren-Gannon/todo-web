@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable, Subject, map, merge, mergeMap, scan, share } from 'rxjs';
 import { Config } from '../config';
 import { Notification } from './dto/notification';
-import { BehaviorSubject, Observable, map, switchMap, tap } from 'rxjs';
 
 @Injectable()
 export class NotificationService {
@@ -11,65 +11,145 @@ export class NotificationService {
     private http: HttpClient,
     private config: Config,
   ) { }
+  
+  private readonly findAll_ = new Subject();
+  private readonly findOne_ = new Subject<string>();
+  private readonly markAsRead_ = new Subject<string>();
 
-  private state: State = {};
-  private readonly state_ = new BehaviorSubject<State>({});
+  private readonly findAllStart$ = this.findAll_.pipe(
+    map(data => ({ type: 'findAll' })),
+  );
+  private readonly findOneStart$ = this.findOne_.pipe(
+    map(data => ({ type: 'findOne', data })),
+  );
+  private readonly markAsReadStart$ = this.markAsRead_.pipe(
+    map(data => ({ type: 'markAsRead', data })),
+  );
 
-  findAll(): Observable<Notification[]> {
-    return this._findAll().pipe( // Channel Error on this call, but not on state so that it mimics an HTTP call
-      tap(notifications => {
-         // Clear original state
-        this.state = notifications.reduce((acc, notification) => {
-          acc[notification.id] = notification;
+  private readonly findAllEnd$ = this.findAllStart$.pipe(
+    mergeMap(action => this.http.get<Notification[]>(`${this.config.apiUrl}/notification`)),
+    map(data => ({ type: 'foundAll', data: data })),
+  );
+  private readonly findOneEnd$ = this.findOneStart$.pipe(
+    mergeMap(action => this.http.get<Notification>(`${this.config.apiUrl}/notification/${(action as any).data}`)),
+    map(data => ({ type: 'foundOne', data })),
+  );
+  private readonly markAsReadEnd$ = this.markAsReadStart$.pipe(
+    mergeMap(action => this.http.patch<Notification>(`${ this.config.apiUrl }/notification/${ action.data }`, {
+      read: true,
+    })),
+    map(data => ({ type: 'markedAsRead', data })),
+  );
+
+  private state$ = merge(
+    this.findAllStart$,
+    this.findOneStart$,
+    this.markAsReadStart$,
+    this.findAllEnd$,
+    this.findOneEnd$,
+    this.markAsReadEnd$,
+  ).pipe(
+    scan((acc, action) => {
+      switch (action.type) {
+        case 'findAll':
+          return {
+            ...acc,
+            loading: true,
+          };
+        case 'findOne':
+          return {
+            ...acc,
+            [(action as any).data]: {
+              ...acc.data[(action as any).data],
+              loading: true,
+            },
+          };
+        case 'markAsRead':
+          return {
+            ...acc,
+            [(action as any).data]: {
+              ...acc.data[(action as any).data],
+              updating: true,
+            },
+          };
+        case 'foundAll':
+          return {
+            ...acc,
+            loading: false,
+            loaded: true,
+            data: (action as any).data.reduce((acc: any, notification: Notification) => ({
+              ...acc,
+              [notification.id]: {
+                data: notification,
+                updating: false,
+                loading: false,
+                loaded: true,
+              },
+            }), {} as NotificationState),
+          };
+        case 'foundOne':
+          return {
+            ...acc,
+            data: {
+              ...acc.data,
+              [(action as any).data.id]: {
+                data: (action as any).data,
+                updating: false,
+                loading: false,
+                loaded: true,
+              },
+            },
+          };
+        case 'markedAsRead':
+          return {
+            ...acc,
+            data: {
+              ...acc.data,
+              [(action as any).data.id]: {
+                data: (action as any).data,
+                updating: false,
+                loading: false,
+                loaded: true,
+              },
+            },
+          };
+        default:
           return acc;
-        }, {} as State);
-        this.state_.next(this.state);
-      }),
-      switchMap(() => this.state_.asObservable()), // Ignore val as its been tapped through
-      map(state => Object.values(state)),
+      }
+    }, { loaded: false, loading: false, data: {} } as State),
+    share(),
+  );
+
+  findAll(): Observable<State> {
+    setTimeout(() => this.findAll_.next(undefined), 0);
+    return this.state$;
+  }
+
+  
+  findOne(id: string): Observable<NotificationState> {
+    setTimeout(() => this.findOne_.next(id), 0);
+    return this.state$.pipe(
+      map(state => state.data[id]),
     );
   }
 
-  private _findAll() {
-    return this.http.get<Notification[]>(`${ this.config.apiUrl }/notification`).pipe(
-      map(notifications => notifications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())),
-    )
-  }
-
-  
-  findOne(id: string) {
-    return this._findOne(id).pipe(
-      tap(notification => {
-         // Clear original state
-        this.state[notification.id] = notification;
-        this.state_.next(this.state);
-      }),
-      switchMap(() => this.state_.asObservable()), // Ignore val as its been tapped through
-      map(state => state[id]),
-    )
-  }
-  
-  private _findOne(id: string) {
-    return this.http.get<Notification>(`${ this.config.apiUrl }/notification/${ id }`)
-  }
-
-  markAsRead(id: string) {
-    return this._markAsRead(id).pipe(
-      tap(notification => {
-         // Clear original state
-        this.state[notification.id] = notification;
-        this.state_.next(this.state);
-      }),
-      switchMap(() => this.state_.asObservable()), // Ignore val as its been tapped through
-      map(state => state[id]),
-    )
-  }
-
-  private _markAsRead(id: string) {
-    return this.http.patch<Notification>(`${ this.config.apiUrl }/notification/${ id }`, {
-      read: true,
-    })
+  markAsRead(id: string): Observable<NotificationState> {
+    setTimeout(() => this.markAsRead_.next(id), 0);
+    return this.state$.pipe(
+      map(state => state.data[id]),
+    );
   }
 }
 
-type State = { [key: string]: Notification };
+interface State {
+  loading: boolean;
+  loaded: boolean;
+  data: {
+    [key: string]: NotificationState,
+  };
+}
+
+export interface NotificationState {
+  data: Notification;
+  updating: boolean;
+}

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Notification, NotificationService } from '../../../api/notification';
+import { Notification, NotificationService, NotificationState } from '../../../api/notification';
 import { NotificationType } from '../../../api/notification/dto/notification-type.enum';
 import { Subject, Observable, switchMap } from 'rxjs';
 
@@ -9,6 +9,8 @@ import { Subject, Observable, switchMap } from 'rxjs';
   styleUrls: ['./notification-list-page.component.scss']
 })
 export class NotificationListPageComponent {
+
+  public readonly Object = Object;
 
   public readonly notifications$ = this.notificationService.findAll();
 
@@ -20,6 +22,10 @@ export class NotificationListPageComponent {
   constructor(
     private readonly notificationService: NotificationService,
   ) { }
+
+  sortNotifications(notifications: NotificationState[]): NotificationState[] {
+    return notifications.sort((a, b) => new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime());
+  }
 
   public getNotificationLink(notification: Notification): string {
     const notificationData = JSON.parse(notification.data);
