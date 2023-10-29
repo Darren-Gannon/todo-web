@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject, map, merge, scan, share, switchMap, take, tap } from 'rxjs';
+import { Observable, Subject, map, merge, scan, share, mergeMap, take, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { Config } from '../config';
 import { BoardState, State } from './board-state';
@@ -39,27 +39,27 @@ export class BoardService {
   );
   
   private findAllEnd$ = this.findAllStart$.pipe(
-    switchMap(() => this.http.get<Board[]>(`${ this.config.apiUrl }/board`)),
+    mergeMap(() => this.http.get<Board[]>(`${ this.config.apiUrl }/board`)),
     map(data => ({ type: 'foundAll', data })),
     share(),
   );
   private findOneEnd$ = this.findOneStart$.pipe(
-    switchMap(({ data: id }) => this.http.get<Board>(`${ this.config.apiUrl }/board/${ id }`)),
+    mergeMap(({ data: id }) => this.http.get<Board>(`${ this.config.apiUrl }/board/${ id }`)),
     map(data => ({ type: 'foundOne', data })),
     share(),
   );
   private createEnd$ = this.createStart$.pipe(
-    switchMap(({ data }) => this.http.post<Board>(`${ this.config.apiUrl }/board`, data)),
+    mergeMap(({ data }) => this.http.post<Board>(`${ this.config.apiUrl }/board`, data)),
     map(data => ({ type: 'created', data })),
     share(),
   );
   private updateEnd$ = this.updateStart$.pipe(
-    switchMap(({ data: { id, board } }) => this.http.patch<Board>(`${ this.config.apiUrl }/board/${ id }`, board)),
+    mergeMap(({ data: { id, board } }) => this.http.patch<Board>(`${ this.config.apiUrl }/board/${ id }`, board)),
     map(data => ({ type: 'updated', data })),
     share(),
   );
   private removeEnd$ = this.removeStart$.pipe(
-    switchMap(({ data: id }) => this.http.delete<Board>(`${ this.config.apiUrl }/board/${ id }`)),
+    mergeMap(({ data: id }) => this.http.delete<Board>(`${ this.config.apiUrl }/board/${ id }`)),
     map(data => ({ type: 'removed', data })),
     share(),
   );
@@ -88,6 +88,8 @@ export class BoardService {
             data: { 
               ...state.data, 
               ...(action as any).data.reduce((acc: any, current: any) => ({ ...acc, [current.id]: {
+                loading: false,
+                loaded: true,
                 creating: false,
                 updating: false,
                 deleting: false,
@@ -104,13 +106,11 @@ export class BoardService {
               [(action as any).data]: {
                 ...state.data?.[(action as any).data],
                 loading: true,
-                loaded: false,
                 updating: false,
                 creating: false,
                 deleting: false,
               } 
             },
-            loading: false 
           };
         case 'foundOne':
           return { 
@@ -124,7 +124,6 @@ export class BoardService {
                 data: (action as any).data,
               } 
             },
-            loading: false 
           };
         case 'create':
           return { 
@@ -204,23 +203,23 @@ export class BoardService {
   );
 
   find(): Observable<State> {
-    this.findAll_.next(null);
-    return this.state$;
+    setTimeout(() => this.findAll_.next(null), 0);
+    return this.state$.pipe(
+      share(),
+    );
   }
 
   findOne(id: Board['id']): Observable<BoardState | undefined> {
-    this.findOne_.next(id);
+    setTimeout(() => this.findOne_.next(id), 0);
     return this.state$.pipe(
       map(state => state.data?.[id]),
+      share(),
     );
   }
 
   create(board: CreateBoard): Observable<Board> {
     const id = uuid();
-    setTimeout(() => this.create_.next({ 
-      ...board,
-      id,
-    }), 0);
+    setTimeout(() => this.create_.next({ ...board, id, }), 0);
     return this.createEnd$.pipe(
       map(state => state.data),
       take(1),
@@ -229,7 +228,7 @@ export class BoardService {
   }
 
   update(id: string, board: UpdateBoard): Observable<Board> {
-    this.update_.next({ id, board });
+    setTimeout(() => this.update_.next({ id, board }), 0);
     return this.updateEnd$.pipe(
       map(state => state.data),
       take(1),
@@ -238,7 +237,7 @@ export class BoardService {
   }
 
   remove(id: string): Observable<Board> {
-    this.remove_.next(id);
+    setTimeout(() => this.remove_.next(id), 0);
     return this.removeEnd$.pipe(
       map(state => state.data),
       take(1),

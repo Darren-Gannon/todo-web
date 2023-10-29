@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, Subject, Subscription, map, mergeMap, share, switchMap, tap, throwError } from 'rxjs';
+import { EMPTY, Subject, Subscription, map, mergeMap, switchMap, tap, throwError } from 'rxjs';
 import { Board, BoardService, State, StateService, Task, TaskService } from '../../../../api';
 import { CachedResult } from '../../../../api/cache-result';
 import { TaskDialogComponent, TaskDialogResult } from './task-dialog/task-dialog.component';
