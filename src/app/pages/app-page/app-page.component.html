@@ -1,7 +1,7 @@
 <ng-container *ngIf="{
     boards: boards$ | async,
     notifications: notifications$ | async,
-    unreadNotifications: unreadNotifications$ | async,
+    unreadNotifications: unreadNotifications$ | async
 } as vm">
     <mat-drawer-container>
         <div>
@@ -70,20 +70,22 @@
 
         <mat-drawer #drawer mode="over" id="drawer">
             <ng-container *ngIf="vm.boards as boards">
-                <mat-nav-list>
-                    <ng-container *ngFor="let board of boards.data">
-                        <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board', board.data.id]">{{
-                            board.data.title }}</a>
-                    </ng-container>
-                    <ng-container *ngIf="boards.stale; else createBoardTmpl">
-                        <a class="stale" mat-list-item>
-                            <span class="text"></span>
-                        </a>
-                    </ng-container>
-                    <ng-template #createBoardTmpl>
-                        <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board/new']">Create</a>
-                    </ng-template>
-                </mat-nav-list>
+                <ng-container *ngIf="boards.loaded">
+                    <mat-nav-list>
+                        <ng-container *ngFor="let board of Object.values(boards.data!)">
+                            <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board', board.data!.id]">{{
+                                board.data!.title }}</a>
+                        </ng-container>
+                        <ng-container *ngIf="boards.loading; else createBoardTmpl">
+                            <a class="stale" mat-list-item>
+                                <span class="text"></span>
+                            </a>
+                        </ng-container>
+                        <ng-template #createBoardTmpl>
+                            <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board/new']">Create</a>
+                        </ng-template>
+                    </mat-nav-list>
+                </ng-container>
             </ng-container>
         </mat-drawer>
 

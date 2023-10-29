@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, map, switchMap, tap } from 'rxjs';
 import { Config } from '../../config';
-import { Board } from '../board';
+import { Board } from '../dto/board.dto';
 import { BoardUser } from './dto/board-user';
 
 @Injectable()

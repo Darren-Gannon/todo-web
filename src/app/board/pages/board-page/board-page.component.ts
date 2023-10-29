@@ -86,7 +86,7 @@ export class BoardPageComponent implements OnInit, OnDestroy {
   private boardSub?: Subscription;
   ngOnInit(): void {
     this.boardSub = this.board$.subscribe(board => this.boardForm.patchValue({
-      title: board?.data.title,
+      title: board?.data?.title,
     }));
     this.updateCreateTaskSub = this.updateCreateTask$.subscribe();
   }

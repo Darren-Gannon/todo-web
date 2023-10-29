@@ -16,8 +16,8 @@
                 </button>
                 <ng-container *ngIf="{ editing: false } as boardVm">
                     <ng-container *ngIf="!boardVm.editing; else editBoardTmpl">
-                        <h2>{{ board.data.title }}</h2>
-                        <ng-container *ngIf="!board.stale">
+                        <h2>{{ board.data!.title }}</h2>
+                        <ng-container *ngIf="!board.updating || !board.deleting || !board.loading">
                             <button mat-icon-button color="accent" (click)="boardVm.editing = true">
                                 <mat-icon>edit</mat-icon>
                             </button>
@@ -29,7 +29,7 @@
                                 <input matInput type="text" [formControl]="vm.boardTitleCtrl">
                                 <button [disabled]="vm.boardTitleCtrl.invalid" type="submit" matSuffix mat-icon-button
                                     color="primary"
-                                    (click)="vm.boardTitleCtrl.valid && editBoard(board.data, { title: vm.boardTitleCtrl.value }); vm.boardTitleCtrl.reset(); boardVm.editing = false;">
+                                    (click)="vm.boardTitleCtrl.valid && editBoard(board.data!, { title: vm.boardTitleCtrl.value }); vm.boardTitleCtrl.reset(); boardVm.editing = false;">
                                     <mat-icon>check</mat-icon>
                                 </button>
                                 <button type="button" matSuffix mat-icon-button color="warn"
@@ -59,7 +59,7 @@
                                                                 <mat-icon>edit</mat-icon>
                                                             </button>
                                                             <button mat-icon-button color="warn"
-                                                                (click)="deleteState(board.data, state.data)">
+                                                                (click)="deleteState(board.data!, state.data)">
                                                                 <mat-icon>delete</mat-icon>
                                                             </button>
                                                         </div>
@@ -73,7 +73,7 @@
                                                     <input matInput type="text" [formControl]="stateVm.ctrl">
                                                     <button [disabled]="stateVm.ctrl.invalid" type="submit" matSuffix
                                                         mat-icon-button color="primary"
-                                                        (click)="stateVm.ctrl.valid && editState(board.data, state.data, { title: stateVm.ctrl.value }); stateVm.ctrl.reset(); stateVm.editing = false;">
+                                                        (click)="stateVm.ctrl.valid && editState(board.data!, state.data, { title: stateVm.ctrl.value }); stateVm.ctrl.reset(); stateVm.editing = false;">
                                                         <mat-icon>check</mat-icon>
                                                     </button>
                                                     <button type="button" matSuffix mat-icon-button color="warn"
@@ -108,7 +108,7 @@
                                                         placeholder="State">
                                                     <button [disabled]="newStateTitle.invalid" type="submit" matSuffix
                                                         mat-icon-button color="primary"
-                                                        (click)="newStateTitle.valid && createState(board.data, { title: newStateTitle.value }); newStateTitle.reset(); addingStateVm.editing = false;">
+                                                        (click)="newStateTitle.valid && createState(board.data!, { title: newStateTitle.value }); newStateTitle.reset(); addingStateVm.editing = false;">
                                                         <mat-icon>check</mat-icon>
                                                     </button>
                                                     <button type="button" matSuffix mat-icon-button color="warn"
@@ -162,13 +162,13 @@
                                     <span class="member-role">
                                         <button mat-button [matMenuTriggerFor]="roleMenu">{{ invite.role | titlecase }}</button>
                                         <mat-menu #roleMenu="matMenu">
-                                            <button mat-menu-item [disabled]="invite.role == UserRole.ADMIN" (click)="updateInviteRole(board.data, invite, UserRole.ADMIN)">Admin</button>
-                                            <button mat-menu-item [disabled]="invite.role == UserRole.MEMBER" (click)="updateInviteRole(board.data, invite, UserRole.MEMBER)">Member</button>
-                                            <button mat-menu-item [disabled]="invite.role == UserRole.SPECTATOR" (click)="updateInviteRole(board.data, invite, UserRole.SPECTATOR)">Spectator</button>
+                                            <button mat-menu-item [disabled]="invite.role == UserRole.ADMIN" (click)="updateInviteRole(board.data!, invite, UserRole.ADMIN)">Admin</button>
+                                            <button mat-menu-item [disabled]="invite.role == UserRole.MEMBER" (click)="updateInviteRole(board.data!, invite, UserRole.MEMBER)">Member</button>
+                                            <button mat-menu-item [disabled]="invite.role == UserRole.SPECTATOR" (click)="updateInviteRole(board.data!, invite, UserRole.SPECTATOR)">Spectator</button>
                                         </mat-menu>
                                     </span>
                                     <div class="trash-can">
-                                        <button mat-icon-button color="warn" (click)="deleteInvite(board.data, invite)">
+                                        <button mat-icon-button color="warn" (click)="deleteInvite(board.data!, invite)">
                                             <mat-icon>delete</mat-icon>
                                         </button>
                                     </div>
@@ -182,7 +182,7 @@
                             </ng-container>
                             <ng-template #inviteUserTmpl>
                                 <form id="invite-user-container" [formGroup]="inviteUserForm"
-                                    (ngSubmit)="inviteUserForm.valid && inviteUserEmitter.next({ userForm: inviteUserForm.value, board: vm.board.data })">
+                                    (ngSubmit)="inviteUserForm.valid && inviteUserEmitter.next({ userForm: inviteUserForm.value, board: board.data! })">
                                     <mat-form-field>
                                         <mat-label>User Email</mat-label>
                                         <input matInput type="text" formControlName="email"
@@ -220,8 +220,8 @@
             </div>
             <div id="delete-button-container">
                 <hr>
-                <button id="delete-button" [disabled]="board.stale" mat-stroked-button color="warn"
-                    (click)="deleteBoard(board.data)">Delete Board</button>
+                <button id="delete-button" [disabled]="board.updating || board.loading || board.deleting" mat-stroked-button color="warn"
+                    (click)="deleteBoard(board.data!)">Delete Board</button>
             </div>
         </div>
     </ng-container>

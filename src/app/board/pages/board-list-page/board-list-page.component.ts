@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { BoardService } from '@api';
-import { delay } from 'rxjs';
+import { delay, tap } from 'rxjs';
 
 @Component({
   selector: 'app-board-list-page',
@@ -9,9 +9,11 @@ import { delay } from 'rxjs';
 })
 export class BoardListPageComponent {
 
+  public readonly Object = Object;
+
   public readonly boards$ = this.boardService.find();
 
   constructor(
     private boardService: BoardService,
-  ) {}
+  ) { }
 }

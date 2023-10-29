@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { State } from '../state';
-import { Board } from '../../board';
+import { Board } from '../../dto/board.dto';
 
 export const createState = createAction('[State] create one', props<{ board: Pick<Board, 'id'>, state: Pick<State, 'title'> }>());
 export const createdState = createAction('[State] created one', props<{ board: Pick<Board, 'id'>, state: State }>());
