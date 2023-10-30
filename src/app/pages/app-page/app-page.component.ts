@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
-import { map, share, switchMap, timer } from 'rxjs';
+import { interval, map, share, startWith, switchMap, timer } from 'rxjs';
 import { BoardService } from '../../../api';
 import { Notification, NotificationService, NotificationState } from '../../../api/notification';
 import { NotificationType } from '../../../api/notification/dto/notification-type.enum';
@@ -15,7 +15,8 @@ export class AppPageComponent {
   public readonly Object = Object;
 
   public readonly boards$ = this.boardService.find();
-  public readonly notifications$ = timer(1000 * 10).pipe(
+  public readonly notifications$ = interval(1000 * 60 * 10).pipe(
+    startWith(0),
     switchMap(() => this.notificationService.findAll()),
     share(),
   );
