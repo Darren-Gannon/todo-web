@@ -1,6 +1,6 @@
 <ng-container *ngIf="{ 
     board: board$ | async, 
-    states: states$ | async 
+    states: states$ | async
 } as vm">
     <ng-container *ngIf="vm.board as board;">
         <ng-container *ngIf="board.loading" [ngTemplateOutlet]="loadingTmpl">
@@ -31,12 +31,12 @@
                                 </div>
                             </mat-toolbar>
                             <div class="column-content">
-                                <button class="create-task-button" mat-raised-button [color]="odd ? 'accent' : 'primary'" (click)="openTask_.next({ board: board.data!, states: states.data, state: state.data })">Create</button>
+                                <button class="create-task-button" mat-raised-button [color]="odd ? 'accent' : 'primary'">Create</button>
                                 <div class="tasks-container">
                                     <ng-container *ngIf="state.data.tasks$ | async as tasks; else loadingTmpl">
                                         <ng-container *ngFor="let task of tasks">
             
-                                            <mat-card mat-ripple (click)="openTask_.next({ board: board.data!, task, states: states.data, state: state.data })">
+                                            <mat-card mat-ripple>
                                                 <mat-card-header>
                                                     <mat-card-title>
                                                         <div>
@@ -59,7 +59,7 @@
                             </div>
                         </div>
                     </ng-container>
-                    <ng-container *ngIf="states.stale">
+                    <ng-container *ngIf="states.loading">
                         <div class="column stale">
                             <mat-toolbar [color]="states.data.length % 2 == 1 ? 'primary' : 'accent'">
                                 <div id="text"></div>

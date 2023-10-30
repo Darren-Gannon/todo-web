@@ -7,8 +7,6 @@ import { StateService } from './board/state';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
-import { StatesEffects } from './board/state/ngrx/state.effects';
-import { StatesReducer } from './board/state/ngrx/state.reducer';
 import { TaskEffects } from './board/task/ngrx/task.effects';
 import { TaskReducer } from './board/task/ngrx/task.reducer';
 import { AuthInterceptor } from './auth.interceptor';
@@ -22,9 +20,8 @@ import { UserInviteService } from './board/user-invite/user-invite.service';
   imports: [
     CommonModule,
     HttpClientModule,
-    StoreModule.forFeature('states', StatesReducer),
     StoreModule.forFeature('tasks', TaskReducer),
-    EffectsModule.forFeature(StatesEffects, TaskEffects),
+    EffectsModule.forFeature(TaskEffects),
   ],
   providers: [
     BoardService,

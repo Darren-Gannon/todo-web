@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, combineLatest, filter, map, share, shareReplay, startWith, switchMap } from 'rxjs';
+import { Subject, combineLatest, filter, map, share, shareReplay, startWith, switchMap, tap } from 'rxjs';
 import { Board, BoardService, BoardUserService, State, StateService, UserRole, UserService } from '../../../../api';
 import { UserInviteService } from '../../../../api/board/user-invite/user-invite.service';
 import { UserInvite } from '../../../../api/board/user-invite/dto/user-invite.dto';
@@ -13,6 +13,7 @@ import { UserInvite } from '../../../../api/board/user-invite/dto/user-invite.dt
 })
 export class BoardSettingsPageComponent {
 
+  public readonly Object = Object;
   public readonly UserRole = UserRole;
 
   public readonly newStateTitle = this.fb.control(undefined!, { nonNullable: true, validators: [Validators.minLength(3), Validators.required] });
@@ -68,7 +69,7 @@ export class BoardSettingsPageComponent {
 
   public readonly statesCtrls$ = this.states$.pipe(
     map(states => states.data),
-    map(states => states.map(state => state.data).map(state => this.fb.control(state.title, { nonNullable: true, validators: [Validators.minLength(3), Validators.required] }))),
+    map(states => Object.values(states ?? {}).map(state => state.data).map(state => this.fb.control(state?.title, { nonNullable: true, validators: [Validators.minLength(3), Validators.required] }))),
     startWith([]),
   );
 

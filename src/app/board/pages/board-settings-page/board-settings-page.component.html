@@ -48,47 +48,49 @@
                         <mat-card id="state-list-container">
                             <ng-container *ngIf="vm.states as states;">
                                 <mat-action-list role="list">
-                                    <ng-container *ngFor="let state of states.data; let i = index">
-                                        <ng-container *ngIf="{ editing: false, ctrl: vm.statesCtrls![i] } as stateVm">
-                                            <ng-container *ngIf="!stateVm.editing; else editStateTmpl">
-                                                <mat-list-item role="listitem">
-                                                    <div class="state-list-item">
-                                                        <span class="state-list-item-title">{{ state.data.title
-                                                            }}</span>
-                                                        <ng-container *ngIf="!state.stale; else loadingTmpl">
-                                                            <div class="state-list-item-actions">
-                                                                <button mat-icon-button color="accent"
-                                                                    (click)="stateVm.editing = true">
-                                                                    <mat-icon>edit</mat-icon>
-                                                                </button>
-                                                                <button mat-icon-button color="warn"
-                                                                    (click)="deleteState(board.data!, state.data)">
-                                                                    <mat-icon>delete</mat-icon>
-                                                                </button>
-                                                            </div>
-                                                        </ng-container>
-                                                    </div>
-                                                </mat-list-item>
+                                    <ng-container *ngIf="states.loaded">
+                                        <ng-container *ngFor="let state of Object.values(states.data!); let i = index">
+                                            <ng-container *ngIf="{ editing: false, ctrl: vm.statesCtrls![i] } as stateVm">
+                                                <ng-container *ngIf="!stateVm.editing; else editStateTmpl">
+                                                    <mat-list-item role="listitem">
+                                                        <div class="state-list-item">
+                                                            <span class="state-list-item-title">{{ state.data!.title
+                                                                }}</span>
+                                                            <ng-container *ngIf="!state.loading; else loadingTmpl">
+                                                                <div class="state-list-item-actions">
+                                                                    <button mat-icon-button color="accent"
+                                                                        (click)="stateVm.editing = true">
+                                                                        <mat-icon>edit</mat-icon>
+                                                                    </button>
+                                                                    <button mat-icon-button color="warn"
+                                                                        (click)="deleteState(board.data!, state.data!)">
+                                                                        <mat-icon>delete</mat-icon>
+                                                                    </button>
+                                                                </div>
+                                                            </ng-container>
+                                                        </div>
+                                                    </mat-list-item>
+                                                </ng-container>
+                                                <ng-template #editStateTmpl>
+                                                    <mat-list-item style="height: 4rem;" role="listitem">
+                                                        <mat-form-field style="width: 100%;">
+                                                            <input matInput type="text" [formControl]="stateVm.ctrl">
+                                                            <button [disabled]="stateVm.ctrl.invalid" type="submit"
+                                                                matSuffix mat-icon-button color="primary"
+                                                                (click)="stateVm.ctrl.valid && editState(board.data!, state.data!, { title: stateVm.ctrl.value! }); stateVm.ctrl.reset(); stateVm.editing = false;">
+                                                                <mat-icon>check</mat-icon>
+                                                            </button>
+                                                            <button type="button" matSuffix mat-icon-button color="warn"
+                                                                (click)="stateVm.ctrl.reset(); stateVm.editing = false;">
+                                                                <mat-icon>cancel</mat-icon>
+                                                            </button>
+                                                        </mat-form-field>
+                                                    </mat-list-item>
+                                                </ng-template>
                                             </ng-container>
-                                            <ng-template #editStateTmpl>
-                                                <mat-list-item style="height: 4rem;" role="listitem">
-                                                    <mat-form-field style="width: 100%;">
-                                                        <input matInput type="text" [formControl]="stateVm.ctrl">
-                                                        <button [disabled]="stateVm.ctrl.invalid" type="submit"
-                                                            matSuffix mat-icon-button color="primary"
-                                                            (click)="stateVm.ctrl.valid && editState(board.data!, state.data, { title: stateVm.ctrl.value }); stateVm.ctrl.reset(); stateVm.editing = false;">
-                                                            <mat-icon>check</mat-icon>
-                                                        </button>
-                                                        <button type="button" matSuffix mat-icon-button color="warn"
-                                                            (click)="stateVm.ctrl.reset(); stateVm.editing = false;">
-                                                            <mat-icon>cancel</mat-icon>
-                                                        </button>
-                                                    </mat-form-field>
-                                                </mat-list-item>
-                                            </ng-template>
                                         </ng-container>
                                     </ng-container>
-                                    <ng-container *ngIf="states.stale; else newStateTmpl">
+                                    <ng-container *ngIf="states.loading; else newStateTmpl">
                                         <mat-list-item role="listitem">
                                             <div class="state-list-item stale">
                                                 <span class="state-list-item-title"></span>
