@@ -4,7 +4,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, Subject, Subscription, map, mergeMap, share, switchMap, tap, throwError } from 'rxjs';
 import { Board, BoardService, State, StateService, Task, TaskService } from '../../../../api';
-import { CachedResult } from '../../../../api/cache-result';
 import { TaskDialogComponent, TaskDialogResult } from './task-dialog/task-dialog.component';
 
 @Component({
@@ -40,7 +39,7 @@ export class BoardPageComponent implements OnInit, OnDestroy {
         data: Object.values(states.data ?? {}).map(state => ({
           ...state,
           data: {
-            ...state.data,
+            ...state.data!,
             tasks$: this.tasks$.pipe(
               map(tasks => tasks.filter(task => task.stateId == state.data?.id))
             ),
@@ -72,5 +71,42 @@ export class BoardPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.updateCreateStatusSub?.unsubscribe();
     this.boardSub?.unsubscribe();
+  }
+
+  createTask(board: Board, state: State, states: { data: State }[]): void {
+    const dialogRef = this.dialog.open(TaskDialogComponent, {
+      data: {
+        states: states,
+        state: state,
+      }
+    });
+
+    dialogRef.afterClosed().pipe(
+      mergeMap((result: TaskDialogResult) => {
+        if(result?.action == 'submit') {
+          return this.taskService.create(board.id, result.task);
+        }
+        return EMPTY;
+      }),
+    ).subscribe();
+  }
+
+  openTask(board: Board, state: State, states: { data: State }[], task: Task): void {
+    const dialogRef = this.dialog.open(TaskDialogComponent, {
+      data: {
+        states: states,
+        state: state,
+        task: task,
+      }
+    });
+
+    dialogRef.afterClosed().pipe(
+      mergeMap((result: TaskDialogResult) => {
+        if(result?.action == 'submit') {
+          return this.taskService.update(board.id, task.id, result.task);
+        }
+        return EMPTY;
+      }),
+    ).subscribe();
   }
 }

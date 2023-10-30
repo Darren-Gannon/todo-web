@@ -31,12 +31,12 @@
                                 </div>
                             </mat-toolbar>
                             <div class="column-content">
-                                <button class="create-task-button" mat-raised-button [color]="odd ? 'accent' : 'primary'">Create</button>
+                                <button class="create-task-button" mat-raised-button [color]="odd ? 'accent' : 'primary'" (click)="createTask(board.data!, state.data, states.data!)">Create</button>
                                 <div class="tasks-container">
                                     <ng-container *ngIf="state.data.tasks$ | async as tasks; else loadingTmpl">
                                         <ng-container *ngFor="let task of tasks">
             
-                                            <mat-card mat-ripple>
+                                            <mat-card mat-ripple (click)="openTask(board.data!, state.data, states.data!, task)">
                                                 <mat-card-header>
                                                     <mat-card-title>
                                                         <div>
