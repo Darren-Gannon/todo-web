@@ -1,18 +1,6 @@
+import { BaseCrud, CacheCrud } from "../cache-crud";
 import { Board } from "./dto/board.dto";
 
-export type State = BoardsState;
-
-interface BoardsState {
-    loading: boolean;
-    loaded: boolean;
-    data?: { [id: Board['id']]: BoardState };
-}
-
-export interface BoardState {
-    loading: boolean;
-    loaded: boolean;
-    creating: boolean;
-    updating: boolean;
-    deleting: boolean;
-    data?: Board;
-}
+export type State = CacheCrud<{ 
+    [id: Board['id']]: (CacheCrud<Board> & BaseCrud) 
+}> & { loading: boolean };

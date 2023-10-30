@@ -13,9 +13,11 @@
                     </div>
                 </a>
                 <ng-container *ngFor="let board of Object.values(boards.data!)">
-                    <a mat-raised-button class="board" [routerLink]="board.data!.id">
-                        <h2 class="board-title">{{ board.data!.title }}</h2>
-                    </a>
+                    <ng-container *ngIf="board.loaded">
+                        <a mat-raised-button class="board" [routerLink]="board.data.id">
+                            <h2 class="board-title">{{ board.data.title }}</h2>
+                        </a>
+                    </ng-container>
                 </ng-container>
             </div>
         </ng-container>

@@ -74,9 +74,11 @@
             <ng-container *ngIf="vm.boards as boards">
                 <ng-container *ngIf="boards.loaded">
                     <mat-nav-list>
-                        <ng-container *ngFor="let board of Object.values(boards.data!)">
-                            <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board', board.data!.id]">{{
-                                board.data!.title }}</a>
+                        <ng-container *ngFor="let board of Object.values(boards.data)">
+                            <ng-container *ngIf="board.loaded">
+                                <a (click)="drawer.close()" mat-list-item [routerLink]="['/app/board', board.data.id]">{{
+                                board.data.title }}</a>
+                            </ng-container>
                         </ng-container>
                         <ng-container *ngIf="boards.loading; else createBoardTmpl">
                             <a class="stale" mat-list-item>

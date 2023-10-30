@@ -59,7 +59,7 @@ export class BoardSettingsPageComponent {
   );
   
   public readonly boardTitleCtrl$ = this.board$.pipe(
-    map(board => this.fb.control(board?.data?.title!, { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] }))
+    map(board => this.fb.control((board?.loaded ? board.data.title : ''), { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] }))
   );
 
   public readonly states$ = this.boardId$.pipe(

@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject, map, merge, scan, share, mergeMap, take, tap } from 'rxjs';
+import { Observable, Subject, map, merge, mergeMap, scan, share, take } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { Config } from '../config';
-import { BoardState, State } from './board-state';
+import { State } from './board-state';
 import { Board } from './dto/board.dto';
 import { CreateBoard } from './dto/create-board.dto';
 import { UpdateBoard } from './dto/update-board.dto';
+import { BaseCrud, CacheCrud } from '../cache-crud';
 
 @Injectable()
 export class BoardService {
@@ -86,7 +87,7 @@ export class BoardService {
           return { 
             ...state,
             data: { 
-              ...state.data, 
+              ...(state.loaded ? state.data : {}), 
               ...(action as any).data.reduce((acc: any, current: any) => ({ ...acc, [current.id]: {
                 loading: false,
                 loaded: true,
@@ -102,9 +103,9 @@ export class BoardService {
           return { 
             ...state, 
             data: { 
-              ...state.data, 
+              ...(state.loaded ? state.data : {}), 
               [(action as any).data]: {
-                ...state.data?.[(action as any).data],
+                ...(state.loaded ? state.data : {})[(action as any).data],
                 loading: true,
                 updating: false,
                 creating: false,
@@ -116,9 +117,9 @@ export class BoardService {
           return { 
             ...state, 
             data: { 
-              ...state.data, 
+              ...(state.loaded ? state.data : {}), 
               [(action as any).data.id]: {
-                ...state.data?.[(action as any).data.id],
+                ...(state.loaded ? state.data : {})[(action as any).data.id],
                 loading: false,
                 loaded: true,
                 data: (action as any).data,
@@ -129,7 +130,7 @@ export class BoardService {
           return { 
             ...state, 
             data: { 
-              ...state.data, 
+              ...(state.loaded ? state.data : {}), 
               [(action as any).data.id]: {
                 loading: true,
                 loaded: false,
@@ -144,11 +145,11 @@ export class BoardService {
           return { 
             ...state, 
             data: { 
-              ...state.data, 
+              ...(state.loaded ? state.data : {}), 
               [(action as any).data.id]: {
+                ...(state.loaded ? state.data : {})?.[(action as any).data.id],
                 loading: false,
                 loaded: true,
-                ...state.data?.[(action as any).data.id],
                 data: (action as any).data,
               },
             },
@@ -157,9 +158,9 @@ export class BoardService {
           return { 
             ...state, 
             data: { 
-              ...state.data, 
+              ...(state.loaded ? state.data : {}), 
               [(action as any).data.id]: {
-                ...state.data?.[(action as any).data.id],
+                ...(state.loaded ? state.data : {})[(action as any).data.id],
                 updating: true,
                 data: (action as any).data,
               },
@@ -169,9 +170,9 @@ export class BoardService {
           return { 
             ...state, 
             data: { 
-              ...state.data, 
+              ...(state.loaded ? state.data : {}), 
               [(action as any).data.id]: {
-                ...state.data?.[(action as any).data.id],
+                ...(state.loaded ? state.data : {})[(action as any).data.id],
                 updating: false,
                 data: (action as any).data,
               },
@@ -181,15 +182,15 @@ export class BoardService {
           return { 
             ...state, 
             data: { 
-              ...state.data, 
+              ...(state.loaded ? state.data : {}), 
               [(action as any).data]: {
-                ...state.data?.[(action as any).data],
+                ...(state.loaded ? state.data : {})?.[(action as any).data],
                 deleting: true,
               },
             },
           };
         case 'removed':
-          delete state?.data?.[(action as any).data.id];
+          delete (state.loaded ? state.data : {})[(action as any).data.id];
           return state;
         default:
           return state;
@@ -209,10 +210,14 @@ export class BoardService {
     );
   }
 
-  findOne(id: Board['id']): Observable<BoardState | undefined> {
+  findOne(id: Board['id']): Observable<(CacheCrud<Board> & BaseCrud) | undefined> {
     setTimeout(() => this.findOne_.next(id), 0);
     return this.state$.pipe(
-      map(state => state.data?.[id]),
+      map(state => {
+        if(!state.loaded)
+          return undefined;
+        return state.data[id];
+      }),
       share(),
     );
   }
