@@ -19,8 +19,6 @@ import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { AuthModule } from '@auth0/auth0-angular';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
-import { StoreModule } from '@ngrx/store';
-import { EffectsModule } from '@ngrx/effects';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { NotificationListPageComponent } from './pages/notification-list-page/notification-list-page.component';
 import { NotificationPageComponent } from './pages/notification-page/notification-page.component';
@@ -62,8 +60,6 @@ import { environment } from 'src/environments/environment';
         audience: environment.auth0.audience,
       }
     }),
-    StoreModule.forRoot({}, {}),
-    EffectsModule.forRoot([]),
   ],
   providers: [
     { provide: LocationStrategy, useClass: HashLocationStrategy },
