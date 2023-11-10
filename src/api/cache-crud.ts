@@ -1,6 +1,7 @@
-export type CacheCrud<T> = (LoadedType<T> | UnloadedType);
+export type CacheCrud<T> = (LoadedType<T> | UnloadedType) & BaseCrud<T>;
 
-export interface BaseCrud {
+interface BaseCrud<T> {
+    data?: T;
     loading: boolean;
     creating: boolean;
     updating: boolean;

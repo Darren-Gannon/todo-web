@@ -1,10 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject, map, merge, mergeMap, scan, share, take, tap, zip, of } from 'rxjs';
+import { Observable, Subject, map, merge, mergeMap, of, scan, share, take, zip } from 'rxjs';
+import { Action } from 'src/api/action';
+import { CacheCrud } from 'src/api/cache-crud';
+import { v4 as uuid } from 'uuid';
 import { Config } from '../../config';
 import { Board } from '../dto/board.dto';
 import { CreateState, State, UpdateState } from './dto';
-import { v4 as uuid } from 'uuid';
+import { StateState } from './state-state';
 
 @Injectable()
 export class StateService {
@@ -20,51 +23,51 @@ export class StateService {
   private readonly update_ = new Subject<{ boardId: Board['id'], id: State['id'], state: UpdateState }>();
   private readonly remove_ = new Subject<{ boardId: Board['id'], id: State['id'] }>();
 
-  private readonly findAll$ = this.findAll_.pipe(
+  private readonly findAll$: Observable<ActionFindAll> = this.findAll_.pipe(
     map(data => ({ type: 'findAll', data })),
   );
-  private readonly create$ = this.create_.pipe(
+  private readonly create$: Observable<ActionCreate> = this.create_.pipe(
     map(data => ({ type: 'create', data })),
   );
-  private readonly createMany$ = this.createMany_.pipe(
+  private readonly createMany$: Observable<ActionCreateMany> = this.createMany_.pipe(
     map(data => ({ type: 'createMany', data })),
   );
-  private readonly update$ = this.update_.pipe(
+  private readonly update$: Observable<ActionUpdate> = this.update_.pipe(
     map(data => ({ type: 'update', data })),
   );
-  private readonly remove$ = this.remove_.pipe(
+  private readonly remove$: Observable<ActionRemove> = this.remove_.pipe(
     map(data => ({ type: 'remove', data })),
   );
 
-  private readonly findAllEnd$ = this.findAll$.pipe(
+  private readonly findAllEnd$: Observable<ActionFoundAll> = this.findAll$.pipe(
     mergeMap(action => zip(([
       this.http.get<State[]>(`${ this.config.apiUrl }/board/${ action.data }/state`),
       of(action.data),
     ]))),
     map(([states, boardId]) => ({ type: 'foundAll', data: { states, boardId } }))
   );
-  private readonly createEnd$ = this.create$.pipe(
+  private readonly createEnd$: Observable<ActionCreated> = this.create$.pipe(
     mergeMap(action => this.http.post<State>(`${ this.config.apiUrl }/board/${ action.data.boardId }/state`, action.data.state)),
-    map(data => ({ type: 'created', data })),
+    map(data => ({ type: 'created', data } satisfies ActionCreated)),
     share(),
   );
-  private readonly createManyEnd$ = this.createMany$.pipe(
+  private readonly createManyEnd$: Observable<ActionCreatedMany> = this.createMany$.pipe(
     mergeMap(action => this.http.post<State[]>(`${ this.config.apiUrl }/board/${ action.data.boardId }/state/many`, action.data.states)),
-    map(data => ({ type: 'createdMany', data })),
+    map(data => ({ type: 'createdMany', data } satisfies ActionCreatedMany)),
     share(),
   );
-  private readonly updateEnd$ = this.update$.pipe(
+  private readonly updateEnd$: Observable<ActionUpdated> = this.update$.pipe(
     mergeMap(action => this.http.patch<State>(`${ this.config.apiUrl }/board/${ action.data.boardId }/state/${ action.data.id }`, action.data.state)),
-    map(data => ({ type: 'updated', data })),
+    map(data => ({ type: 'updated', data } satisfies ActionUpdated)),
     share(),
   );
-  private readonly removeEnd$ = this.remove$.pipe(
+  private readonly removeEnd$: Observable<ActionRemoved> = this.remove$.pipe(
     mergeMap(action => this.http.delete<State>(`${ this.config.apiUrl }/board/${ action.data.boardId }/state/${ action.data.id }`)),
-    map(data => ({ type: 'removed', data })),
+    map(data => ({ type: 'removed', data } satisfies ActionRemoved)),
     share(),
   );
 
-  private readonly state$ = merge(
+  private readonly state$: Observable<StateState> = merge(
     this.findAll$,
     this.create$,
     this.createMany$,
@@ -81,121 +84,203 @@ export class StateService {
         case 'findAll':
           return {
             ...state,
-            [(action as any).data]: {
-              ...state[(action as any)],
-              loading: true,
-            },
+            data: {
+              ...state.data,
+              [action.data]: {
+                creating: false,
+                deleting: false,
+                loaded: false,
+                updating: false,
+                data: undefined,
+                ...state.data?.[action.data],
+                loading: true,
+              },
+            }
           };
         case 'create':
           return {
             ...state,
-            [(action as any).data.boardId]: {
-              ...state[(action as any).data.boardId],
-              creating: true,
-            },
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                deleting: false,
+                updating: false,
+                loaded: false,
+                loading: false,
+                data: undefined,
+                ...state.data?.[action.data.boardId],
+                creating: true,
+              },
+            }
           };
-        // case 'createMany': // TODO Find out why this isnt triggering
+        // case 'createMany': // TODO
         case 'update':
           return {
             ...state,
-            [(action as any).data.boardId]: {
-              ...state[(action as any).data.boardId],
-              data: {
-                ...state[(action as any).data.boardId].data,
-                [(action as any).data.id]: {
-                  ...state[(action as any).data.boardId].data?.[(action as any).data.id],
-                  updating: true,
+            data: {
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                loaded: false,
+                loading: false,
+                updating: false,
+                ...state.data?.[action.data.boardId],
+                data: {
+                  ...state.data?.[action.data.boardId].data,
+                  [action.data.id]: {
+                    creating: false,
+                    deleting: false,
+                    loaded: false,
+                    loading: false,
+                    ...state.data?.[action.data.boardId].data?.[action.data.id],
+                    updating: true,
+                  },
                 },
               },
-            },
+            }
           };
         case 'remove':
           return {
             ...state,
-            [(action as any).data.boardId]: {
-              ...state[(action as any).data.boardId],
-              data: {
-                ...state[(action as any).data.boardId].data,
-                [(action as any).data.id]: {
-                  ...state[(action as any).data.boardId].data?.[(action as any).data.id],
-                  removing: true,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                loaded: false,
+                loading: false,
+                updating: false,
+                deleting: false,
+                ...state.data?.[action.data.boardId],
+                data: {
+                  ...state.data?.[action.data.boardId].data,
+                  [action.data.id]: {
+                    creating: false,
+                    loaded: false,
+                    loading: false,
+                    updating: false,
+                    ...state.data?.[action.data.boardId].data?.[action.data.id],
+                    deleting: true,
+                  },
                 },
               },
-            },
+            }
           };
         case 'foundAll':
           return {
             ...state,
-            [(action as any).data.boardId]: {
-              ...state[(action as any).data.boardId],
-              data: (action as any).data.states.reduce((acc: any, state: any) => ({
-                ...acc,
-                [state.id]: {
-                  data: state,
-                  loading: false,
-                  loaded: true,
-                },
-              }), {}),
-              loading: false,
-              loaded: true,
-            },
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                updating: false,
+                ...state.data?.[action.data.boardId],
+                loading: false,
+                loaded: true,
+                data: action.data.states.reduce((acc, _state) => {
+                  acc[_state.id] = {
+                    data: _state,
+                    loading: false,
+                    loaded: true,
+                    creating: false,
+                    updating: false,
+                    deleting: false,
+                  };
+                  return acc;
+                }, { } as { [stateId: string]: CacheCrud<State>; })
+              },
+            }
           };
         case 'created':
           return {
             ...state,
-            [(action as any).data.boardId]: {
-              ...state[(action as any).data.boardId],
-              data: {
-                ...state[(action as any).data.boardId].data,
-                [(action as any).data.id]: {
-                  data: (action as any).data,
-                  loading: false,
-                  loaded: true,
-                  creating: false,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                loaded: false,
+                loading: false,
+                updating: false,
+                ...state.data?.[action.data.boardId],
+                data: {
+                  ...state.data?.[action.data.boardId].data,
+                  [action.data.id]: {
+                    deleting: false,
+                    updating: false,
+                    data: action.data,
+                    loading: false,
+                    loaded: true,
+                    creating: false,
+                  },
                 },
               },
-            },
+            }
           };
-        // case 'createdMany': // TODO Find out why this isnt triggering
+        // case 'createdMany': // TODO
         case 'updated':
           return {
             ...state,
-            [(action as any).data.boardId]: {
-              ...state[(action as any).data.boardId],
-              data: {
-                ...state[(action as any).data.boardId].data,
-                [(action as any).data.id]: {
-                  data: (action as any).data,
-                  loading: false,
-                  loaded: true,
-                  updating: false,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                loaded: false,
+                loading: false,
+                updating: false,
+                ...state.data?.[action.data.boardId],
+                data: {
+                  ...state.data?.[action.data.boardId].data,
+                  [action.data.id]: {
+                    creating: false,
+                    deleting: false,
+                    data: action.data,
+                    loading: false,
+                    loaded: true,
+                    updating: false,
+                  },
                 },
               },
-            },
+            }
           };
         case 'removed':
-          const updateState = state[(action as any).data.boardId].data;
+          const updateState = state.data?.[action.data.boardId].data;
           if(updateState)
-            delete updateState[(action as any).data.id];
+            delete updateState[action.data.id];
           return {
             ...state,
-            [(action as any).data.boardId]: {
-              ...state[(action as any).data.boardId],
-              data: {
-                ...updateState,
+            data: {
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                loaded: false,
+                loading: false,
+                updating: false,
+                ...state.data?.[action.data.boardId],
+                data: {
+                  ...updateState,
+                },
               },
-            },
+            }
           };
         default:
           return state;
       }
-    }, {  } as Cache),
+    }, {
+      loading: false,
+      loaded: false,
+      creating: false,
+      deleting: false,
+      updating: false,
+      data: {},
+    } as StateState),
   );
 
-  find(boardId: Board['id']): Observable<BoardCache> {
+  find(boardId: Board['id']): Observable<CacheCrud<{ [stateId: string]: CacheCrud<State>; }>> {
     setTimeout(() => this.findAll_.next(boardId), 0);
     return this.state$.pipe(
-      map(state => state[boardId]),
+      map(state => state.data![boardId]),
     )
   }
 
@@ -236,24 +321,13 @@ export class StateService {
   }
 }
 
-interface Cache {
-  [boardId: string]: BoardCache;
-}
-
-interface BoardCache {
-  loading: boolean;
-  loaded: boolean;
-  data?: {
-    [stateId: string]: StateCache;
-  };
-}
-
-interface StateCache {
-  loading: boolean;
-  loaded: boolean;
-  creating: boolean;
-  updating: boolean;
-  removing: boolean;
-  data?: State;
-}
-
+type ActionFindAll = Action<'findAll', Board['id']>;
+type ActionCreate = Action<'create', { boardId: Board['id'], state: CreateState }>;
+type ActionCreateMany = Action<'createMany', { boardId: Board['id'], states: CreateState[] }>;
+type ActionUpdate = Action<'update', { boardId: Board['id'], id: State['id'], state: UpdateState }>;
+type ActionRemove = Action<'remove', { boardId: Board['id'], id: State['id'] }>;
+type ActionFoundAll = Action<'foundAll', { states: State[], boardId: Board['id'] }>;
+type ActionCreated = Action<'created', State>;
+type ActionCreatedMany = Action<'createdMany', State[]>;
+type ActionUpdated = Action<'updated', State>;
+type ActionRemoved = Action<'removed', State>;

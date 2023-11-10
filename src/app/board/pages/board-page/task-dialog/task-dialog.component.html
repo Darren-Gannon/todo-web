@@ -9,7 +9,7 @@
             <mat-form-field id="task-status">
                 <mat-label>Status</mat-label>
                 <mat-select formControlName="stateId">
-                    <mat-option *ngFor="let state of data.states" [value]="state.data.id"> {{ state.data.title }} </mat-option>
+                    <mat-option *ngFor="let state in data.states" [value]="state.data.id"> {{ state.data.title }} </mat-option>
                 </mat-select>
             </mat-form-field>
         </div>

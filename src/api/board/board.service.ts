@@ -2,12 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, map, merge, mergeMap, scan, share, take } from 'rxjs';
 import { v4 as uuid } from 'uuid';
+import { Action } from '../action';
+import { CacheCrud } from '../cache-crud';
 import { Config } from '../config';
-import { State } from './board-state';
+import { BoardState } from './board-state';
 import { Board } from './dto/board.dto';
 import { CreateBoard } from './dto/create-board.dto';
 import { UpdateBoard } from './dto/update-board.dto';
-import { BaseCrud, CacheCrud } from '../cache-crud';
 
 @Injectable()
 export class BoardService {
@@ -19,52 +20,52 @@ export class BoardService {
 
   private readonly findAll_ = new Subject();
   private readonly findOne_ = new Subject<Board['id']>();
-  private readonly create_ = new Subject<CreateBoard>();
+  private readonly create_ = new Subject<_CreateBoard>();
   private readonly update_ = new Subject<{ id: Board['id'], board: UpdateBoard }>();
   private readonly remove_ = new Subject<Board['id']>();
 
-  private findAllStart$ = this.findAll_.asObservable().pipe(
-    map(data => ({ type: 'findAll' })),
+  private findAllStart$: Observable<ActionFindAll> = this.findAll_.asObservable().pipe(
+    map(data => ({ type: 'findAll', data: null })),
   );
-  private findOneStart$ = this.findOne_.asObservable().pipe(
+  private findOneStart$: Observable<ActionFindOne> = this.findOne_.asObservable().pipe(
     map(data => ({ type: 'findOne', data })),
   );
-  private createStart$ = this.create_.asObservable().pipe(
+  private createStart$: Observable<ActionCreate> = this.create_.asObservable().pipe(
     map(data => ({ type: 'create', data })),
   );
-  private updateStart$ = this.update_.asObservable().pipe(
+  private updateStart$: Observable<ActionUpdate> = this.update_.asObservable().pipe(
     map(data => ({ type: 'update', data })),
   );
-  private removeStart$ = this.remove_.asObservable().pipe(
+  private removeStart$: Observable<ActionRemove> = this.remove_.asObservable().pipe(
     map(data => ({ type: 'remove', data })),
   );
-  
-  private findAllEnd$ = this.findAllStart$.pipe(
-    mergeMap(() => this.http.get<Board[]>(`${ this.config.apiUrl }/board`)),
-    map(data => ({ type: 'foundAll', data })),
+
+  private findAllEnd$: Observable<ActionFoundAll> = this.findAllStart$.pipe(
+    mergeMap(() => this.http.get<Board[]>(`${this.config.apiUrl}/board`)),
+    map(data => ({ type: 'foundAll', data } satisfies ActionFoundAll)),
     share(),
   );
-  private findOneEnd$ = this.findOneStart$.pipe(
-    mergeMap(({ data: id }) => this.http.get<Board>(`${ this.config.apiUrl }/board/${ id }`)),
-    map(data => ({ type: 'foundOne', data })),
+  private findOneEnd$: Observable<ActionFoundOne> = this.findOneStart$.pipe(
+    mergeMap(({ data: id }) => this.http.get<Board>(`${this.config.apiUrl}/board/${id}`)),
+    map(data => ({ type: 'foundOne', data } satisfies ActionFoundOne)),
     share(),
   );
-  private createEnd$ = this.createStart$.pipe(
-    mergeMap(({ data }) => this.http.post<Board>(`${ this.config.apiUrl }/board`, data)),
-    map(data => ({ type: 'created', data })),
+  private createEnd$: Observable<ActionCreated> = this.createStart$.pipe(
+    mergeMap(({ data }) => this.http.post<Board>(`${this.config.apiUrl}/board`, data)),
+    map(data => ({ type: 'created', data } satisfies ActionCreated)),
     share(),
   );
-  private updateEnd$ = this.updateStart$.pipe(
-    mergeMap(({ data: { id, board } }) => this.http.patch<Board>(`${ this.config.apiUrl }/board/${ id }`, board)),
-    map(data => ({ type: 'updated', data })),
+  private updateEnd$: Observable<ActionUpdated> = this.updateStart$.pipe(
+    mergeMap(({ data: { id, board } }) => this.http.patch<Board>(`${this.config.apiUrl}/board/${id}`, board)),
+    map(data => ({ type: 'updated', data } satisfies ActionUpdated)),
     share(),
   );
-  private removeEnd$ = this.removeStart$.pipe(
-    mergeMap(({ data: id }) => this.http.delete<Board>(`${ this.config.apiUrl }/board/${ id }`)),
-    map(data => ({ type: 'removed', data })),
+  private removeEnd$: Observable<ActionRemoved> = this.removeStart$.pipe(
+    mergeMap(({ data: id }) => this.http.delete<Board>(`${this.config.apiUrl}/board/${id}`)),
+    map(data => ({ type: 'removed', data } satisfies ActionRemoved)),
     share(),
   );
-  private readonly state$: Observable<State> = merge(
+  private readonly state$: Observable<BoardState> = merge(
     this.findAllStart$,
     this.findOneStart$,
     this.createStart$,
@@ -77,144 +78,151 @@ export class BoardService {
     this.removeEnd$,
   ).pipe(
     scan((state, action) => {
-      switch(action.type) {
+      switch (action.type) {
         case 'findAll':
-          return { 
-            ...state, 
+          return {
+            ...state,
             loading: true,
           };
         case 'foundAll':
-          return { 
+          return {
             ...state,
-            data: { 
-              ...(state.loaded ? state.data : {}), 
-              ...(action as any).data.reduce((acc: any, current: any) => ({ ...acc, [current.id]: {
-                loading: false,
-                loaded: true,
-                creating: false,
-                updating: false,
-                deleting: false,
-                data: current,
-              } }), {} as any) },
+            data: {
+              ...(state.loaded ? state.data : {}),
+              ...action.data.reduce((acc: any, current: any) => ({
+                ...acc,
+                [current.id]: {
+                  loading: false,
+                  loaded: true,
+                  creating: false,
+                  updating: false,
+                  deleting: false,
+                  data: current,
+                },
+              }), {}),
+            },
             loading: false,
             loaded: true,
           };
         case 'findOne':
-          return { 
-            ...state, 
-            data: { 
-              ...(state.loaded ? state.data : {}), 
-              [(action as any).data]: {
-                ...(state.loaded ? state.data : {})[(action as any).data],
+          return {
+            ...state,
+            data: {
+              ...(state.loaded ? state.data : {}),
+              [action.data]: {
+                ...(state.loaded ? state.data : {})[action.data],
                 loading: true,
                 updating: false,
                 creating: false,
                 deleting: false,
-              } 
+              },
             },
           };
         case 'foundOne':
-          return { 
-            ...state, 
-            data: { 
-              ...(state.loaded ? state.data : {}), 
-              [(action as any).data.id]: {
-                ...(state.loaded ? state.data : {})[(action as any).data.id],
+          return {
+            ...state,
+            data: {
+              ...(state.loaded ? state.data : {}),
+              [action.data.id]: {
+                ...(state.loaded ? state.data : {})[action.data.id],
                 loading: false,
                 loaded: true,
-                data: (action as any).data,
-              } 
+                data: action.data,
+              },
             },
           };
         case 'create':
-          return { 
-            ...state, 
-            data: { 
-              ...(state.loaded ? state.data : {}), 
-              [(action as any).data.id]: {
+          return {
+            ...state,
+            data: {
+              ...(state.loaded ? state.data : {}),
+              [action.data.id]: {
                 loading: true,
                 loaded: false,
                 creating: true,
                 updating: false,
                 deleting: false,
-                data: (action as any).data,
+                data: action.data,
               },
             },
           };
         case 'created':
-          return { 
-            ...state, 
-            data: { 
-              ...(state.loaded ? state.data : {}), 
-              [(action as any).data.id]: {
-                ...(state.loaded ? state.data : {})?.[(action as any).data.id],
+          return {
+            ...state,
+            data: {
+              ...(state.loaded ? state.data : {}),
+              [action.data.id]: {
+                ...(state.loaded ? state.data : {})?.[action.data.id],
                 loading: false,
                 loaded: true,
-                data: (action as any).data,
+                data: action.data,
               },
             },
           };
         case 'update':
-          return { 
-            ...state, 
-            data: { 
-              ...(state.loaded ? state.data : {}), 
-              [(action as any).data.id]: {
-                ...(state.loaded ? state.data : {})[(action as any).data.id],
+          return {
+            ...state,
+            data: {
+              ...(state.loaded ? state.data : {}),
+              [action.data.id]: {
+                ...(state.loaded ? state.data : {})[action.data.id],
                 updating: true,
-                data: (action as any).data,
+                data: action.data,
               },
             },
           };
         case 'updated':
-          return { 
-            ...state, 
-            data: { 
-              ...(state.loaded ? state.data : {}), 
-              [(action as any).data.id]: {
-                ...(state.loaded ? state.data : {})[(action as any).data.id],
+          return {
+            ...state,
+            data: {
+              ...(state.loaded ? state.data : {}),
+              [action.data.id]: {
+                ...(state.loaded ? state.data : {})[action.data.id],
                 updating: false,
-                data: (action as any).data,
+                data: action.data,
               },
             },
           };
         case 'remove':
-          return { 
-            ...state, 
-            data: { 
-              ...(state.loaded ? state.data : {}), 
-              [(action as any).data]: {
-                ...(state.loaded ? state.data : {})?.[(action as any).data],
+          return {
+            ...state,
+            data: {
+              ...(state.loaded ? state.data : {}),
+              [action.data]: {
+                ...(state.loaded ? state.data : {})?.[action.data],
                 deleting: true,
               },
             },
           };
         case 'removed':
-          delete (state.loaded ? state.data : {})[(action as any).data.id];
+          delete (state.loaded ? state.data : {})[action.data.id];
           return state;
         default:
           return state;
       }
-    }, ({ 
+    }, ({
       loading: false,
       loaded: false,
+      creating: false,
+      deleting: false,
+      updating: false,
       data: {},
-    }) as State),
+    }) as BoardState),
     share(),
   );
 
-  find(): Observable<State> {
+  find(): Observable<BoardState> {
     setTimeout(() => this.findAll_.next(null), 0);
     return this.state$.pipe(
       share(),
     );
   }
 
-  findOne(id: Board['id']): Observable<(CacheCrud<Board> & BaseCrud) | undefined> {
+  findOne(id: Board['id']): Observable<CacheCrud<Board> | undefined> {
     setTimeout(() => this.findOne_.next(id), 0);
     return this.state$.pipe(
       map(state => {
-        if(!state.loaded)
+        if (!state.loaded)
           return undefined;
         return state.data[id];
       }),
@@ -250,3 +258,16 @@ export class BoardService {
     );
   }
 }
+
+type _CreateBoard = Pick<Board, 'id' | 'title'>;
+
+type ActionFindAll = Action<'findAll', null>;
+type ActionFindOne = Action<'findOne', string>;
+type ActionCreate = Action<'create', _CreateBoard>;
+type ActionUpdate = Action<'update', { id: string, board: UpdateBoard }>;
+type ActionRemove = Action<'remove', string>;
+type ActionFoundAll = Action<'foundAll', Board[]>;
+type ActionFoundOne = Action<'foundOne', Board>;
+type ActionCreated = Action<'created', Board>;
+type ActionUpdated = Action<'updated', Board>;
+type ActionRemoved = Action<'removed', Board>;

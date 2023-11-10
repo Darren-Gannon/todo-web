@@ -5,7 +5,7 @@ import { EMPTY } from 'rxjs';
 import { map, exhaustMap, catchError } from 'rxjs/operators';
 import * as TaskActions from './task.actions';
 import { Config } from '../../../config';
-import { Task } from '../task';
+import { Task } from '../dto/task.dto';
  
 @Injectable()
 export class TaskEffects {

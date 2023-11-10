@@ -68,7 +68,7 @@ export class BoardSettingsPageComponent {
   );
 
   public readonly statesCtrls$ = this.states$.pipe(
-    map(states => states.data),
+    map(states => states?.data),
     map(states => Object.values(states ?? {}).map(state => state.data).map(state => this.fb.control(state?.title, { nonNullable: true, validators: [Validators.minLength(3), Validators.required] }))),
     startWith([]),
   );

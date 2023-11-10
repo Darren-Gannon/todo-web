@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormBuilder, Validators } from '@angular/forms';
 import { State, Task, CachedResult } from '../../../../../api';
+import { CacheCrud } from 'src/api/cache-crud';
 
 @Component({
   selector: 'app-task-dialog',
@@ -35,7 +36,7 @@ export class TaskDialogComponent implements OnInit {
 
 export interface TaskDialogData {
   task?: Task;
-  states: CachedResult<State>[];
+  states: { [stateId: string]: CacheCrud<State>; };
   state: State;
 }
 

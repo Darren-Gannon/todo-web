@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { Task } from '../task';
+import { Task } from '../dto/task.dto';
 import * as TaskActions from './task.actions';
 
 export const TaskReducer = createReducer(

@@ -1,6 +1,8 @@
 <ng-container *ngIf="{ 
     board: board$ | async, 
-    states: states$ | async
+    states: states$ | async,
+    tasks: tasks$ | async,
+    stateTaskMap: stateTaskMap$ | async,
 } as vm">
     <ng-container *ngIf="vm.board as board;">
         <ng-container *ngIf="board.loading" [ngTemplateOutlet]="loadingTmpl">
@@ -23,45 +25,49 @@
             </div>
             <div id="columns-container">
                 <ng-container *ngIf="vm.states as states; else loadingTmpl">
-                    <ng-container  *ngFor="let state of states.data; let odd = odd">
-                        <div class="column">
-                            <mat-toolbar [color]="odd ? 'primary' : 'accent'">
-                                <div>
-                                    <h3>{{ state.data.title }}</h3>
-                                </div>
-                            </mat-toolbar>
-                            <div class="column-content">
-                                <button class="create-task-button" mat-raised-button [color]="odd ? 'accent' : 'primary'" (click)="createTask(board.data!, state.data, states.data!)">Create</button>
-                                <div class="tasks-container">
-                                    <ng-container *ngIf="state.data.tasks$ | async as tasks; else loadingTmpl">
-                                        <ng-container *ngFor="let task of tasks">
-            
-                                            <mat-card mat-ripple (click)="openTask(board.data!, state.data, states.data!, task)">
-                                                <mat-card-header>
-                                                    <mat-card-title>
-                                                        <div>
-                                                            <h4>{{ task.title }}</h4>
-                                                        </div>
-                                                    </mat-card-title>
-                                                </mat-card-header>
-                                                <mat-card-content>
-                                                    <div class="task-content">
-                                                        <span class="task-content-description">{{ task.description }}</span>
-            
-                                                        <span class="task-content-created-at">{{ task.createdAt | date : 'shortDate' }}</span>
-                                                    </div>
-                                                </mat-card-content>
-                                            </mat-card>
-            
+                    <ng-container *ngIf="states.loaded; else loadingTmpl">
+                        <ng-container *ngFor="let state of Object.values(states.data); let odd = odd">
+                            <div class="column">
+                                <ng-container *ngIf="state.loaded">
+                                    <mat-toolbar [color]="odd ? 'primary' : 'accent'">
+                                        <div>
+                                            <h3>{{ state.data.title }}</h3>
+                                        </div>
+                                    </mat-toolbar>
+                                    <div class="column-content">
+                                        <button class="create-task-button" mat-raised-button [color]="odd ? 'accent' : 'primary'" (click)="createTask(board.data, state.data, states.data)">Create</button>
+                                        <ng-container *ngIf="vm.stateTaskMap as stateTaskMap">
+                                            <div class="tasks-container">
+                                                <ng-container *ngFor="let task of stateTaskMap[state.data.id]">
+                                                    <ng-container *ngIf="task.loaded">
+                                                        <mat-card mat-ripple (click)="openTask(board.data, state.data, states.data, task.data)">
+                                                            <mat-card-header>
+                                                                <mat-card-title>
+                                                                    <div>
+                                                                        <h4>{{ task.data.title }}</h4>
+                                                                    </div>
+                                                                </mat-card-title>
+                                                            </mat-card-header>
+                                                            <mat-card-content>
+                                                                <div class="task-content">
+                                                                    <span class="task-content-description">{{ task.data.description }}</span>
+                        
+                                                                    <span class="task-content-created-at">{{ task.data.createdAt | date : 'shortDate' }}</span>
+                                                                </div>
+                                                            </mat-card-content>
+                                                        </mat-card>
+                                                    </ng-container>
+                                                </ng-container>
+                                            </div>
                                         </ng-container>
-                                    </ng-container>
-                                </div>
+                                    </div>
+                                </ng-container>
                             </div>
-                        </div>
+                        </ng-container>
                     </ng-container>
-                    <ng-container *ngIf="states.loading">
+                    <ng-container *ngIf="states?.loading">
                         <div class="column stale">
-                            <mat-toolbar [color]="states.data.length % 2 == 1 ? 'primary' : 'accent'">
+                            <mat-toolbar>
                                 <div id="text"></div>
                             </mat-toolbar>
                         </div>

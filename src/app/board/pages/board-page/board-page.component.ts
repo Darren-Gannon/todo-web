@@ -2,9 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
-import { EMPTY, Subject, Subscription, filter, map, mergeMap, share, switchMap, tap, throwError } from 'rxjs';
+import { EMPTY, Observable, Subject, Subscription, combineLatest, filter, map, mergeMap, share, switchMap, tap, throwError } from 'rxjs';
 import { Board, BoardService, State, StateService, Task, TaskService } from '../../../../api';
 import { TaskDialogComponent, TaskDialogResult } from './task-dialog/task-dialog.component';
+import { CacheCrud } from 'src/api/cache-crud';
 
 @Component({
   selector: 'app-board-page',
@@ -12,6 +13,8 @@ import { TaskDialogComponent, TaskDialogResult } from './task-dialog/task-dialog
   styleUrls: ['./board-page.component.scss']
 })
 export class BoardPageComponent implements OnInit, OnDestroy {
+
+  public readonly Object = Object;
 
   public readonly boardForm = this.fb.group({
     title: this.fb.control('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] })
@@ -26,30 +29,25 @@ export class BoardPageComponent implements OnInit, OnDestroy {
     share(),
   );
 
-  public readonly tasks$ =  this.boardId$.pipe(
+  public readonly tasks$ = this.boardId$.pipe(
     switchMap(boardId => this.taskService.find(boardId)),
+    share(),
   );
 
   public readonly states$ = this.boardId$.pipe(
     switchMap(boardId => this.stateService.find(boardId)),
-  ).pipe(
-    map((states) => {
-      const ret = {
-        ...states,
-        data: Object.values(states.data ?? {}).map(state => ({
-          ...state,
-          data: {
-            ...state.data!,
-            tasks$: this.tasks$.pipe(
-              map(tasks => tasks.filter(task => task.stateId == state.data?.id))
-            ),
-          },
-        }))
-      };
-      return ret;
-    }),
+    share(),
   );
 
+  public readonly stateTaskMap$ = combineLatest([
+    this.states$,
+    this.tasks$,
+  ]).pipe(
+    map(([states, tasks]) => Object.values(states.data ?? {}).reduce((acc, state) => {
+      acc[state.data!.id] = !tasks.data ? [] : Object.values(tasks.data).filter(task => task.data?.stateId == state.data!.id);
+      return acc;
+    }, {} as { [stateId: string]: CacheCrud<Task>[]; })),
+  );
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -76,7 +74,7 @@ export class BoardPageComponent implements OnInit, OnDestroy {
     this.boardSub?.unsubscribe();
   }
 
-  createTask(board: Board, state: State, states: { data: State }[]): void {
+  createTask(board: Board, state: State, states: { [stateId: string]: CacheCrud<State>; }): void {
     const dialogRef = this.dialog.open(TaskDialogComponent, {
       data: {
         states: states,
@@ -94,7 +92,7 @@ export class BoardPageComponent implements OnInit, OnDestroy {
     ).subscribe();
   }
 
-  openTask(board: Board, state: State, states: { data: State }[], task: Task): void {
+  openTask(board: Board, state: State, states: { [stateId: string]: CacheCrud<State>; }, task: Task): void {
     const dialogRef = this.dialog.open(TaskDialogComponent, {
       data: {
         states: states,
@@ -104,9 +102,12 @@ export class BoardPageComponent implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().pipe(
+      filter(result => result?.action),
       mergeMap((result: TaskDialogResult) => {
-        if(result?.action == 'submit') {
+        if(result.action == 'submit') {
           return this.taskService.update(board.id, task.id, result.task);
+        } else if (result.action == 'delete') {
+          return this.taskService.remove(board.id, task.id);
         }
         return EMPTY;
       }),
