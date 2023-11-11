@@ -55,6 +55,11 @@
     }
 }
 
+.container-sm {
+    @extend .container;
+    width: 400px;
+}
+
 $scales: (sm: .25rem, md: .5rem, lg: 1rem);
 $directions: top, bottom, left, right;
 @each $scale, $size in $scales {

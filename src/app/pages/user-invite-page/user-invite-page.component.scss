@@ -1,6 +1,17 @@
 @import '/src/import-styles.scss';
 
 #invite-container {
-    @extend .margin-sm-top;
-    @extend .container;
+    @extend .margin-md-top;
+    @extend .container-sm;
+}
+
+#actions {
+    display: flex;
+    flex-direction: row;
+    @extend .gap-sm;
+    width: 100%;
+}
+
+#accept-button {
+    flex-grow: 1;
 }

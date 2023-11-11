@@ -13,12 +13,11 @@
                     <p>
                         You have been invited as a {{ invite.role | titlecase }} to join the board {{ invite.boardTitle }}.
                     </p>
-                    <pre>{{ invite | json }}</pre>
                 </mat-card-content>
                 <mat-card-actions>
                     <div id="actions">
                         <button mat-raised-button color="warn" (click)="declineInvite(invite.id)">Decline</button>
-                        <button mat-raised-button color="primary" (click)="acceptInvite(invite)">Accept</button>
+                        <button id="accept-button" mat-raised-button color="primary" (click)="acceptInvite(invite)">Accept</button>
                     </div>
                 </mat-card-actions>
             </mat-card>
