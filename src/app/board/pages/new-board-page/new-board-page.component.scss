@@ -1,11 +1,8 @@
 @import '/src/import-styles.scss';
 
 #board-form {
-    padding-top: .5rem;
-    padding-bottom: .5rem;
-    margin-left: auto;
-    margin-right: auto;
-    width: 400px;
+    @extend .margin-md-top;
+    @extend .container-sm;
 }
 
 #board-form-content {
