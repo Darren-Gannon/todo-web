@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject, map, merge, mergeMap, scan, share } from 'rxjs';
+import { Observable, Subject, map, merge, mergeMap, scan, share, take } from 'rxjs';
 import { Action } from 'src/api/action';
 import { v4 as uuid } from 'uuid';
 import { Config } from '../../config';
@@ -19,7 +19,7 @@ export class UserInviteService {
 
   private readonly findAllForBoard_ = new Subject<{ boardId: string; }>();
   private readonly findOneForBoard_ = new Subject<{ boardId: string; inviteId: string; }>();
-  private readonly createForBoard_ = new Subject<{ boardId: string; userInvite: CreateUserInviteDto; }>();
+  private readonly createForBoard_ = new Subject<{ boardId: string; userInvite: CreateUserInviteDto & { id: string }; }>();
   private readonly updateForBoard_ = new Subject<{ boardId: string, inviteId: string, userInvite: UpdateUserInviteDto }>();
   private readonly removeForBoard_ = new Subject<{ boardId: string; inviteId: string; }>();
 
@@ -30,7 +30,7 @@ export class UserInviteService {
     map(({ boardId, inviteId }) => ({ type: 'findOneForBoard', data: { boardId, inviteId } })),
   );
   private readonly createForBoard$: Observable<ActionCreateForBoard> = this.createForBoard_.pipe(
-    map(({ boardId, userInvite }) => ({ type: 'createForBoard', data: { boardId, userInvite: { id: uuid(), ...userInvite } } })),
+    map(({ boardId, userInvite }) => ({ type: 'createForBoard', data: { boardId, userInvite } })),
   );
   private readonly updateForBoard$: Observable<ActionUpdateForBoard> = this.updateForBoard_.pipe(
     map(({ boardId, inviteId, userInvite }) => ({ type: 'updateForBoard', data: { boardId, inviteId, userInvite } })),
@@ -102,10 +102,99 @@ export class UserInviteService {
               },
             },
           };
-        // case 'findOneForBoard':
-        // case 'createForBoard':
-        // case 'updateForBoard':
-        // case 'removeForBoard':
+        case 'findOneForBoard':
+          return {
+            ...state,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                loaded: false,
+                updating: false,
+                loading: false,
+                ...state.data?.[action.data.boardId],
+                data: {
+                  ...state.data?.[action.data.boardId]?.data,
+                  [action.data.inviteId]: {
+                    creating: false,
+                    deleting: false,
+                    loaded: false,
+                    updating: false,
+                    ...state.data?.[action.data.boardId]?.data?.[action.data.inviteId],
+                    loading: true,
+                  },
+                },
+              },
+            },
+          };
+        case 'createForBoard':
+          return {
+            ...state,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                deleting: false,
+                loaded: false,
+                updating: false,
+                loading: false,
+                ...state.data?.[action.data.boardId],
+                creating: true,
+              },
+            },
+          };
+        case 'updateForBoard':
+          return {
+            ...state,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                loaded: false,
+                updating: false,
+                loading: false,
+                ...state.data?.[action.data.boardId],
+                data: {
+                  ...state.data?.[action.data.boardId]?.data,
+                  [action.data.inviteId]: {
+                    creating: false,
+                    deleting: false,
+                    loaded: false,
+                    updating: false,
+                    ...state.data?.[action.data.boardId]?.data?.[action.data.inviteId],
+                    loading: true,
+                  },
+                },
+              },
+            },
+          };
+        case 'removeForBoard':
+          return {
+            ...state,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                loaded: false,
+                updating: false,
+                loading: false,
+                ...state.data?.[action.data.boardId],
+                deleting: true,
+                data: {
+                  ...state.data?.[action.data.boardId]?.data,
+                  [action.data.inviteId]: {
+                    creating: false,
+                    loaded: false,
+                    updating: false,
+                    loading: false,
+                    ...state.data?.[action.data.boardId]?.data?.[action.data.inviteId],
+                    deleting: true,
+                  },
+                },
+              },
+            },
+          };
         case 'foundAllForBoard':
           return {
             ...state,
@@ -133,10 +222,105 @@ export class UserInviteService {
               },
             },
           };
-        // case 'foundOneForBoard':
-        // case 'createdForBoard':
-        // case 'updatedForBoard':
-        // case 'removedForBoard':
+        case 'foundOneForBoard':
+          return {
+            ...state,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                updating: false,
+                ...state.data?.[action.data.boardId],
+                loaded: true,
+                loading: false,
+                data: {
+                  ...state.data?.[action.data.boardId]?.data,
+                  [action.data.userInvite.id]: {
+                    creating: false,
+                    deleting: false,
+                    updating: false,
+                    ...state.data?.[action.data.boardId]?.data?.[action.data.userInvite.id],
+                    loaded: true,
+                    loading: false,
+                    data: action.data.userInvite,
+                  },
+                },
+              },
+            },
+          };
+        case 'createdForBoard':
+          return {
+            ...state,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                loaded: true,
+                updating: false,
+                loading: false,
+                ...state.data?.[action.data.boardId],
+                data: {
+                  ...state.data?.[action.data.boardId]?.data,
+                  [action.data.userInvite.id]: {
+                    creating: false,
+                    deleting: false,
+                    loaded: true,
+                    updating: false,
+                    loading: false,
+                    data: action.data.userInvite,
+                  },
+                },
+              },
+            },
+          };
+        case 'updatedForBoard':
+          return {
+            ...state,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                loaded: false,
+                updating: false,
+                loading: false,
+                ...state.data?.[action.data.boardId],
+                data: {
+                  ...state.data?.[action.data.boardId]?.data,
+                  [action.data.userInvite.id]: {
+                    creating: false,
+                    deleting: false,
+                    loaded: true,
+                    updating: false,
+                    loading: false,
+                    data: action.data.userInvite,
+                  },
+                },
+              },
+            },
+          };
+        case 'removedForBoard':
+          const updateState = state.data?.[action.data.boardId].data;
+          if(updateState)
+            delete updateState[action.data.inviteId];
+          return {
+            ...state,
+            data: {
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                loaded: false,
+                loading: false,
+                updating: false,
+                ...state.data?.[action.data.boardId],
+                data: {
+                  ...updateState,
+                },
+              },
+            }
+          };
         default: 
           return state;
       }
@@ -151,7 +335,12 @@ export class UserInviteService {
   );
   
   create(boardId: string, userInvite: CreateUserInviteDto) {
-    return this.http.post<UserInvite>(`${ this.config.apiUrl }/board/${ boardId }/user-invite`, userInvite);
+    const id = uuid();
+    setTimeout(() => this.createForBoard_.next({ boardId, userInvite: { ...userInvite, id } }), 0);
+    return this.boardState$.pipe(
+      map(state => state.data?.[boardId]?.data?.[id]?.data),
+      take(1),
+    );
   }
 
   findAllForBoard(boardId: string) {
@@ -162,15 +351,26 @@ export class UserInviteService {
   }
 
   findOneForBoard(boardId: string, inviteId: string) {
-    return this.http.get<UserInvite>(`${ this.config.apiUrl }/board/${ boardId }/user-invite/${ inviteId }`);
+    setTimeout(() => this.findOneForBoard_.next({ boardId, inviteId }), 0);
+    return this.boardState$.pipe(
+      map(state => state.data?.[boardId]?.data?.[inviteId]?.data),
+    );
   }
 
   updateForBoard(boardId: string, inviteId: string, userInvite: UpdateUserInviteDto) {
-    return this.http.patch<UserInvite>(`${ this.config.apiUrl }/board/${ boardId }/user-invite/${ inviteId }`, userInvite);
+    setTimeout(() => this.updateForBoard_.next({ boardId, inviteId, userInvite }), 0);
+    return this.boardState$.pipe(
+      map(state => state.data?.[boardId]?.data?.[inviteId]?.data),
+      take(1),
+    );
   }
 
   removeForBoard(boardId: string, inviteId: string) {
-    return this.http.delete<UserInvite>(`${ this.config.apiUrl }/board/${ boardId }/user-invite/${ inviteId }`);
+    setTimeout(() => this.removeForBoard_.next({ boardId, inviteId }), 0);
+    return this.boardState$.pipe(
+      map(state => state.data?.[boardId]?.data?.[inviteId]?.data),
+      take(1),
+    );
   }
 
   findAllForUser() {
