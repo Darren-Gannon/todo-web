@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject, map, merge, mergeMap, scan, share, take } from 'rxjs';
+import { Observable, Subject, map, merge, mergeMap, scan, share, take, tap } from 'rxjs';
 import { Action } from 'src/api/action';
 import { v4 as uuid } from 'uuid';
 import { Config } from '../../config';
@@ -40,8 +40,8 @@ export class UserInviteService {
   );
   private readonly foundAllForBoard$: Observable<ActionFoundAllForBoard> = this.findAllForBoard$.pipe(
     mergeMap(({ data: { boardId }}) => this.http.get<UserInvite[]>(`${ this.config.apiUrl }/board/${ boardId }/user-invite`)),
+    map(userInvites => ({ type: 'foundAllForBoard', data: { boardId: userInvites[0]?.boardId, userInvites } } satisfies ActionFoundAllForBoard)),
     share(),
-    map(userInvites => ({ type: 'foundAllForBoard', data: { boardId: userInvites[0].boardId, userInvites } } satisfies ActionFoundAllForBoard)),
   );
   private readonly foundOneForBoard$: Observable<ActionFoundOneForBoard> = this.findOneForBoard$.pipe(
     mergeMap(({ data: { boardId, inviteId }}) => this.http.get<UserInvite>(`${ this.config.apiUrl }/board/${ boardId }/user-invite/${ inviteId }`)),

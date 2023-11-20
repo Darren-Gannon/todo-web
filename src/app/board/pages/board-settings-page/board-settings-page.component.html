@@ -199,7 +199,7 @@
                                 </ng-container>
                                 <ng-template #inviteUserTmpl>
                                     <form id="invite-user-container" [formGroup]="inviteUserForm"
-                                        (ngSubmit)="inviteUserForm.valid && inviteUserEmitter.next({ userForm: inviteUserForm.value, board: board.data! })">
+                                        (ngSubmit)="inviteUserForm.valid && inviteUserEmitter.next({ userForm: inviteUserForm.value, board: board.data! });  inviteUserVm.inviting = false; inviteUserForm.reset();">
                                         <mat-form-field>
                                             <mat-label>User Email</mat-label>
                                             <input matInput type="text" formControlName="email"
@@ -220,8 +220,7 @@
                                             </mat-select>
                                         </mat-form-field>
                                         <div id="invite-user-actions">
-                                            <button [disabled]="inviteUserForm.invalid" mat-icon-button color="accent"
-                                                type="submit">
+                                            <button [disabled]="inviteUserForm.invalid" mat-icon-button color="accent" type="submit">
                                                 <mat-icon>check</mat-icon>
                                             </button>
                                             <button mat-icon-button color="warn" type="button"
