@@ -164,30 +164,32 @@
 
                         <mat-card id="invite-list-container">
                             <ng-container *ngIf="vm.userInvites as userInvites">
-                                <ng-container *ngFor="let invite of userInvites">
-                                    <div class="invite-container">
-                                        <img class="member-picture"
-                                            src="assets/images/invite-{{ invite.role.toLowerCase() }}-profile-image.svg">
-                                        <span class="member-email">{{ invite.email }}</span>
-                                        <span class="member-role">
-                                            <button mat-button [matMenuTriggerFor]="roleMenu">{{ invite.role | titlecase
-                                                }}</button>
-                                            <mat-menu #roleMenu="matMenu">
-                                                <button mat-menu-item [disabled]="invite.role == UserRole.ADMIN"
-                                                    (click)="updateInviteRole(board.data!, invite, UserRole.ADMIN)">Admin</button>
-                                                <button mat-menu-item [disabled]="invite.role == UserRole.MEMBER"
-                                                    (click)="updateInviteRole(board.data!, invite, UserRole.MEMBER)">Member</button>
-                                                <button mat-menu-item [disabled]="invite.role == UserRole.SPECTATOR"
-                                                    (click)="updateInviteRole(board.data!, invite, UserRole.SPECTATOR)">Spectator</button>
-                                            </mat-menu>
-                                        </span>
-                                        <div class="trash-can">
-                                            <button mat-icon-button color="warn"
-                                                (click)="deleteInvite(board.data!, invite)">
-                                                <mat-icon>delete</mat-icon>
-                                            </button>
+                                <ng-container *ngFor="let invite of Object.values(userInvites)">
+                                    <ng-container *ngIf="invite.loaded">
+                                        <div class="invite-container">
+                                            <img class="member-picture"
+                                                src="assets/images/invite-{{ invite.data.role.toLowerCase() }}-profile-image.svg">
+                                            <span class="member-email">{{ invite.data.email }}</span>
+                                            <span class="member-role">
+                                                <button mat-button [matMenuTriggerFor]="roleMenu">{{ invite.data.role | titlecase
+                                                    }}</button>
+                                                <mat-menu #roleMenu="matMenu">
+                                                    <button mat-menu-item [disabled]="invite.data.role == UserRole.ADMIN"
+                                                        (click)="updateInviteRole(board.data!, invite.data, UserRole.ADMIN)">Admin</button>
+                                                    <button mat-menu-item [disabled]="invite.data.role == UserRole.MEMBER"
+                                                        (click)="updateInviteRole(board.data!, invite.data, UserRole.MEMBER)">Member</button>
+                                                    <button mat-menu-item [disabled]="invite.data.role == UserRole.SPECTATOR"
+                                                        (click)="updateInviteRole(board.data!, invite.data, UserRole.SPECTATOR)">Spectator</button>
+                                                </mat-menu>
+                                            </span>
+                                            <div class="trash-can">
+                                                <button mat-icon-button color="warn"
+                                                    (click)="deleteInvite(board.data!, invite.data)">
+                                                    <mat-icon>delete</mat-icon>
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </ng-container>
                                 </ng-container>
                             </ng-container>
                             <ng-container *ngIf="{ inviting: false } as inviteUserVm">
