@@ -6,7 +6,7 @@ export interface Notification {
     userId: string;
     read: boolean;
     type: NotificationType;
-    data: string;
+    data: object;
     createdAt: string;
     updatedAt: string;
 }

@@ -35,7 +35,7 @@ export class AppPageComponent {
   ) { }
 
   public getNotificationLink(notification: Notification): string {
-    const notificationData = JSON.parse(notification.data);
+    const notificationData: any = notification.data;
     switch (notification.type) {
       case NotificationType.CREATE_BOARD: 
         return `/app/board/${ notificationData.board.id }`;

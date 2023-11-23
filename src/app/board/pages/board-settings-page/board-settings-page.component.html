@@ -199,7 +199,7 @@
                                 </ng-container>
                                 <ng-template #inviteUserTmpl>
                                     <form id="invite-user-container" [formGroup]="inviteUserForm"
-                                        (ngSubmit)="inviteUserForm.valid && inviteUserEmitter.next({ userForm: inviteUserForm.value, board: board.data! });  inviteUserVm.inviting = false; inviteUserForm.reset();">
+                                        (ngSubmit)="inviteUserForm.valid && inviteUserEmitter.next({ userForm: inviteUserForm.value, board: board.data });  inviteUserVm.inviting = false; inviteUserForm.reset();">
                                         <mat-form-field>
                                             <mat-label>User Email</mat-label>
                                             <input matInput type="text" formControlName="email"
