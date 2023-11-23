@@ -18,7 +18,7 @@ export class StateService {
   ) { }
 
   private readonly findAll_ = new Subject<Board['id']>();
-  private readonly create_ = new Subject<{ boardId: Board['id'], state: CreateState }>();
+  private readonly create_ = new Subject<{ boardId: Board['id'], state: CreateState & { id: string } }>();
   private readonly createMany_ = new Subject<{ boardId: Board['id'], states: CreateState[] }>();
   private readonly update_ = new Subject<{ boardId: Board['id'], id: State['id'], state: UpdateState }>();
   private readonly remove_ = new Subject<{ boardId: Board['id'], id: State['id'] }>();
@@ -84,135 +84,88 @@ export class StateService {
         case 'findAll':
           return {
             ...state,
-            data: {
-              ...state.data,
-              [action.data]: {
-                creating: false,
-                deleting: false,
-                loaded: false,
-                updating: false,
-                data: undefined,
-                ...state.data?.[action.data],
-                loading: true,
-              },
+            [action.data]: {
+              ...state?.[action.data],
+              loading: true,
             }
-          };
+          } as StateState;
         case 'create':
           return {
             ...state,
-            data: {
-              ...state.data,
-              [action.data.boardId]: {
-                deleting: false,
-                updating: false,
-                loaded: false,
-                loading: false,
-                data: undefined,
-                ...state.data?.[action.data.boardId],
-                creating: true,
-              },
+            [action.data.boardId]: {
+              ...state?.[action.data.boardId],
+              data: {
+                ...state?.[action.data.boardId].data,
+                [action.data.state.id]: {
+                  ...state?.[action.data.boardId].data?.[action.data.state.id],
+                  creating: true,
+                },
+              }
             }
-          };
+          } as StateState;
         // case 'createMany': // TODO
         case 'update':
           return {
             ...state,
-            data: {
-              [action.data.boardId]: {
-                creating: false,
-                deleting: false,
-                loaded: false,
-                loading: false,
-                updating: false,
-                ...state.data?.[action.data.boardId],
-                data: {
-                  ...state.data?.[action.data.boardId].data,
-                  [action.data.id]: {
-                    creating: false,
-                    deleting: false,
-                    loaded: false,
-                    loading: false,
-                    ...state.data?.[action.data.boardId].data?.[action.data.id],
-                    updating: true,
-                  },
+            [action.data.boardId]: {
+              ...state?.[action.data.boardId],
+              data: {
+                ...state?.[action.data.boardId].data,
+                [action.data.id]: {
+                  ...state?.[action.data.boardId].data?.[action.data.id],
+                  updating: true,
                 },
               },
             }
-          };
+          } as StateState;
         case 'remove':
           return {
             ...state,
-            data: {
-              ...state.data,
-              [action.data.boardId]: {
-                creating: false,
-                loaded: false,
-                loading: false,
-                updating: false,
-                deleting: false,
-                ...state.data?.[action.data.boardId],
-                data: {
-                  ...state.data?.[action.data.boardId].data,
-                  [action.data.id]: {
-                    creating: false,
-                    loaded: false,
-                    loading: false,
-                    updating: false,
-                    ...state.data?.[action.data.boardId].data?.[action.data.id],
-                    deleting: true,
-                  },
+            [action.data.boardId]: {
+              ...state?.[action.data.boardId],
+              data: {
+                ...state?.[action.data.boardId].data,
+                [action.data.id]: {
+                  ...state?.[action.data.boardId].data?.[action.data.id],
+                  deleting: true,
                 },
               },
             }
-          };
+          } as StateState;
         case 'foundAll':
           return {
             ...state,
-            data: {
-              ...state.data,
-              [action.data.boardId]: {
-                creating: false,
-                deleting: false,
-                updating: false,
-                ...state.data?.[action.data.boardId],
-                loading: false,
-                loaded: true,
-                data: action.data.states.reduce((acc, _state) => {
-                  acc[_state.id] = {
-                    data: _state,
-                    loading: false,
-                    loaded: true,
-                    creating: false,
-                    updating: false,
-                    deleting: false,
-                  };
-                  return acc;
-                }, { } as { [stateId: string]: CacheCrud<State>; })
-              },
-            }
-          };
+            [action.data.boardId]: {
+              ...state?.[action.data.boardId],
+              loading: false,
+              loaded: true,
+              data: action.data.states.reduce((acc, _state) => {
+                acc[_state.id] = {
+                  data: _state,
+                  loading: false,
+                  loaded: true,
+                  creating: false,
+                  updating: false,
+                  deleting: false,
+                };
+                return acc;
+              }, { } as { [stateId: string]: CacheCrud<State>; })
+            },
+          } as StateState;
         case 'created':
           return {
             ...state,
-            data: {
-              ...state.data,
-              [action.data.boardId]: {
-                creating: false,
-                deleting: false,
-                loaded: false,
-                loading: false,
-                updating: false,
-                ...state.data?.[action.data.boardId],
-                data: {
-                  ...state.data?.[action.data.boardId].data,
-                  [action.data.id]: {
-                    deleting: false,
-                    updating: false,
-                    data: action.data,
-                    loading: false,
-                    loaded: true,
-                    creating: false,
-                  },
+            [action.data.boardId]: {
+              ...state?.[action.data.boardId],
+              data: {
+                ...state?.[action.data.boardId].data,
+                [action.data.id]: {
+                  deleting: false,
+                  updating: false,
+                  data: action.data,
+                  loading: false,
+                  loaded: true,
+                  creating: false,
                 },
               },
             }
@@ -221,66 +174,47 @@ export class StateService {
         case 'updated':
           return {
             ...state,
-            data: {
-              ...state.data,
-              [action.data.boardId]: {
-                creating: false,
-                deleting: false,
-                loaded: false,
-                loading: false,
-                updating: false,
-                ...state.data?.[action.data.boardId],
-                data: {
-                  ...state.data?.[action.data.boardId].data,
-                  [action.data.id]: {
-                    creating: false,
-                    deleting: false,
-                    data: action.data,
-                    loading: false,
-                    loaded: true,
-                    updating: false,
-                  },
+            [action.data.boardId]: {
+              ...state?.[action.data.boardId],
+              data: {
+                ...state?.[action.data.boardId].data,
+                [action.data.id]: {
+                  creating: false,
+                  deleting: false,
+                  data: action.data,
+                  loading: false,
+                  loaded: true,
+                  updating: false,
                 },
               },
+              updating: false,
             }
-          };
+          } as StateState;
         case 'removed':
-          const updateState = state.data?.[action.data.boardId].data;
+          const updateState = state?.[action.data.boardId].data;
           if(updateState)
             delete updateState[action.data.id];
           return {
             ...state,
-            data: {
-              [action.data.boardId]: {
-                creating: false,
-                deleting: false,
-                loaded: false,
-                loading: false,
-                updating: false,
-                ...state.data?.[action.data.boardId],
-                data: {
-                  ...updateState,
-                },
+            [action.data.boardId]: {
+              ...state?.[action.data.boardId],
+              data: {
+                ...updateState,
               },
-            }
-          };
+            },
+          } as StateState;
         default:
           return state;
       }
     }, {
-      loading: false,
-      loaded: false,
-      creating: false,
-      deleting: false,
-      updating: false,
-      data: {},
     } as StateState),
+    share(),
   );
 
   find(boardId: Board['id']): Observable<CacheCrud<{ [stateId: string]: CacheCrud<State>; }> | undefined> {
     setTimeout(() => this.findAll_.next(boardId), 0);
     return this.state$.pipe(
-      map(state => state.data?.[boardId]),
+      map(state => state?.[boardId]),
     )
   }
 
@@ -322,7 +256,7 @@ export class StateService {
 }
 
 type ActionFindAll = Action<'findAll', Board['id']>;
-type ActionCreate = Action<'create', { boardId: Board['id'], state: CreateState }>;
+type ActionCreate = Action<'create', { boardId: Board['id'], state: CreateState & { id: string } }>;
 type ActionCreateMany = Action<'createMany', { boardId: Board['id'], states: CreateState[] }>;
 type ActionUpdate = Action<'update', { boardId: Board['id'], id: State['id'], state: UpdateState }>;
 type ActionRemove = Action<'remove', { boardId: Board['id'], id: State['id'] }>;
