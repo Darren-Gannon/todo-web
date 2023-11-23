@@ -24,7 +24,7 @@
                             <ng-container *ngIf="notifications.loaded">
                                 <button mat-icon-button [matMenuTriggerFor]="notificationMenu">
                                     <mat-icon [matBadge]="vm.unreadNotifications" [matBadgeHidden]="vm.unreadNotifications == 0"
-                                    matBadgeColor="warn" matBadgePosition="before" matBadgeSize="small">notifications</mat-icon>
+                                    matBadgeColor="warn" matBadgePosition="before" aria-hidden="false" matBadgeSize="small">notifications</mat-icon>
                                 </button>
 
                                 <mat-menu #notificationMenu="matMenu">
@@ -54,7 +54,7 @@
                         <ng-container *ngIf="vm.userInvites as userInvites">
 
                             <button mat-icon-button [matMenuTriggerFor]="settingsMenu">
-                                <mat-icon [matBadge]="userInvites.length" matBadgeSize="small" [matBadgeHidden]="userInvites.length == 0" matBadgeColor="accent" matBadgePosition="before">menu</mat-icon>
+                                <mat-icon [matBadge]="userInvites.length" matBadgeSize="small" aria-hidden="false" [matBadgeHidden]="userInvites.length == 0" matBadgeColor="accent" matBadgePosition="before">menu</mat-icon>
                             </button>
 
                             <mat-menu #settingsMenu="matMenu">
