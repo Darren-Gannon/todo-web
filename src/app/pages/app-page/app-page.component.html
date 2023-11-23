@@ -28,7 +28,7 @@
                                 <mat-menu #notificationMenu="matMenu">
                                     <div id="notifications-menu">
                                         <ng-container *ngFor="let notification of sortNotifications(Object.values(notifications.data))">
-                                            <a class="notification-container" mat-menu-item [routerLink]="getNotificationLink(notification.data)">
+                                            <a class="notification-container" mat-menu-item [routerLink]="getNotificationLink(notification.data)" (click)="markAsRead(notification.data)">
                                                 <div class="notification-link">
                                                     <mat-icon *ngIf="!notification.data.read" color="accent">adjust</mat-icon>
                                                     <span>{{ notification.data.title }}</span>

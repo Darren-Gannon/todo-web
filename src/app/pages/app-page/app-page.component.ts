@@ -34,6 +34,10 @@ export class AppPageComponent {
     public readonly notificationService: NotificationService,
   ) { }
 
+  public markAsRead(notification: Notification) {
+    this.notificationService.markAsRead(notification.id).subscribe();
+  }
+
   public getNotificationLink(notification: Notification): string {
     const notificationData: any = notification.data;
     switch (notification.type) {
