@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, combineLatest, filter, map, share, shareReplay, startWith, switchMap, tap } from 'rxjs';
-import { Board, BoardService, BoardUserService, State, StateService, UserRole, UserService } from '../../../../api';
+import { Board, BoardService, BoardUser, BoardUserService, State, StateService, User, UserRole, UserService } from '../../../../api';
 import { UserInviteService } from '../../../../api/board/user-invite/user-invite.service';
 import { UserInvite } from '../../../../api/board/user-invite/dto/user-invite.dto';
 import { AuthService } from '@auth0/auth0-angular';
@@ -45,7 +45,7 @@ export class BoardSettingsPageComponent {
     this.userService.findAll(),
   ]).pipe(
     map(([boardUsers, userInvites, users]) => {
-      const boardUsersIds = boardUsers.map(({ userId }) => userId);
+      const boardUsersIds = Object.values(boardUsers ?? {}).map(user => user.data?.userId);
       const userInvitesEmails = Object.values(userInvites??{}).map(invite => invite.data?.email);
       return users.filter(user => !boardUsersIds.includes(user.user_id)).filter(user => !userInvitesEmails.includes(user.email));
     }),
@@ -115,6 +115,12 @@ export class BoardSettingsPageComponent {
 
   editState(board: Board, original: State, state: Pick<State, "title">) {
     return this.stateService.update(board.id, original.id, state).subscribe();
+  }
+
+  updateUserRole(board: Board, user: BoardUser, role: UserRole) {
+    this.boardUserService.updateUser(board.id, user.id, {
+      role: role,
+    }).subscribe()
   }
 
   updateInviteRole(board: Board, invite: UserInvite, role: UserRole) {

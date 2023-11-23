@@ -134,35 +134,37 @@
                     <div id="user-container">
                         <ng-container *ngIf="vm.boardUsers as boardUsers">
                             <mat-card id="user-list-container">
-                                <ng-container *ngFor="let user of boardUsers">
-                                    <div class="member-container">
-                                        <img class="member-picture" [src]="user.picture"
-                                            onerror="this.src='assets/images/default-profile-image.svg';">
-                                        <span class="member-name">{{ user.name }}</span>
-                                        <span class="member-email">{{ user.email }}</span>
-                                        <span class="member-role">
-                                            <button mat-button [matMenuTriggerFor]="roleMenu">{{ user.role | titlecase
-                                                }}</button>
-                                            <mat-menu #roleMenu="matMenu">
-                                                <button mat-menu-item
-                                                    [disabled]="user.role == UserRole.ADMIN">Admin</button>
-                                                <button mat-menu-item
-                                                    [disabled]="user.role == UserRole.MEMBER">Member</button>
-                                                <button mat-menu-item
-                                                    [disabled]="user.role == UserRole.SPECTATOR">Spectator</button>
-                                            </mat-menu>
-                                        </span>
-                                        <div class="trash-can">
-                                            <button mat-icon-button color="warn">
-                                                <ng-container *ngIf="vm.currentUser?.sub != user.userId; else leaveTmpl">
-                                                    <mat-icon>delete</mat-icon>
-                                                </ng-container>
-                                                <ng-template #leaveTmpl>
-                                                    <mat-icon>logout</mat-icon>
-                                                </ng-template>
-                                            </button>
+                                <ng-container *ngFor="let user of Object.values(boardUsers)">
+                                    <ng-container *ngIf="user.loaded">
+                                        <div class="member-container">
+                                            <img class="member-picture" [src]="user.data.picture"
+                                                onerror="this.src='assets/images/default-profile-image.svg';">
+                                            <span class="member-name">{{ user.data.name }}</span>
+                                            <span class="member-email">{{ user.data.email }}</span>
+                                            <span class="member-role">
+                                                <button mat-button [matMenuTriggerFor]="roleMenu">{{ user.data.role | titlecase
+                                                    }}</button>
+                                                <mat-menu #roleMenu="matMenu">
+                                                    <button mat-menu-item
+                                                        [disabled]="user.data.role == UserRole.ADMIN" (click)="updateUserRole(board.data, user.data, UserRole.ADMIN)">Admin</button>
+                                                    <button mat-menu-item
+                                                        [disabled]="user.data.role == UserRole.MEMBER"(click)="updateUserRole(board.data, user.data, UserRole.MEMBER)">Member</button>
+                                                    <button mat-menu-item
+                                                        [disabled]="user.data.role == UserRole.SPECTATOR"(click)="updateUserRole(board.data, user.data, UserRole.SPECTATOR)">Spectator</button>
+                                                </mat-menu>
+                                            </span>
+                                            <div class="trash-can">
+                                                <button mat-icon-button color="warn">
+                                                    <ng-container *ngIf="vm.currentUser?.sub != user.data.userId; else leaveTmpl">
+                                                        <mat-icon>delete</mat-icon>
+                                                    </ng-container>
+                                                    <ng-template #leaveTmpl>
+                                                        <mat-icon>logout</mat-icon>
+                                                    </ng-template>
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </ng-container>
                                 </ng-container>
 
                             </mat-card>
