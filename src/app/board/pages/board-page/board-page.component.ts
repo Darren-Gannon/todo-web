@@ -43,8 +43,9 @@ export class BoardPageComponent implements OnInit, OnDestroy {
     this.states$,
     this.tasks$,
   ]).pipe(
-    map(([states, tasks]) => Object.values(states.data ?? {}).reduce((acc, state) => {
-      acc[state.data!.id] = !tasks.data ? [] : Object.values(tasks.data).filter(task => task.data?.stateId == state.data!.id);
+    map(([states, tasks]) => Object.values(states?.data ?? {}).reduce((acc, state) => {
+      if(state.data)
+        acc[state.data.id] = !tasks.data ? [] : Object.values(tasks.data).filter(task => task.data?.stateId == state.data?.id);
       return acc;
     }, {} as { [stateId: string]: CacheCrud<Task>[]; })),
   );

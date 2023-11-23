@@ -277,10 +277,10 @@ export class StateService {
     } as StateState),
   );
 
-  find(boardId: Board['id']): Observable<CacheCrud<{ [stateId: string]: CacheCrud<State>; }>> {
+  find(boardId: Board['id']): Observable<CacheCrud<{ [stateId: string]: CacheCrud<State>; }> | undefined> {
     setTimeout(() => this.findAll_.next(boardId), 0);
     return this.state$.pipe(
-      map(state => state.data![boardId]),
+      map(state => state.data?.[boardId]),
     )
   }
 
