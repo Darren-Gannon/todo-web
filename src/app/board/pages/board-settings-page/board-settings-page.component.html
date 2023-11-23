@@ -6,7 +6,8 @@
     boardUsers: boardUsers$ | async,
     users: users$ | async,
     inviteUser: inviteUser$ | async,
-    userInvites: userInvites$ | async
+    userInvites: userInvites$ | async,
+    currentUser: currentUser$ | async,
 } as vm">
     <ng-container *ngIf="vm.board as board">
         <ng-container *ngIf="board.loading" [ngTemplateOutlet]="loadingTmpl"></ng-container>
@@ -153,7 +154,12 @@
                                         </span>
                                         <div class="trash-can">
                                             <button mat-icon-button color="warn">
-                                                <mat-icon>delete</mat-icon>
+                                                <ng-container *ngIf="vm.currentUser?.sub != user.userId; else leaveTmpl">
+                                                    <mat-icon>delete</mat-icon>
+                                                </ng-container>
+                                                <ng-template #leaveTmpl>
+                                                    <mat-icon>logout</mat-icon>
+                                                </ng-template>
                                             </button>
                                         </div>
                                     </div>

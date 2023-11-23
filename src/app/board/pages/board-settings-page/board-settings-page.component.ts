@@ -5,6 +5,7 @@ import { Subject, combineLatest, filter, map, share, shareReplay, startWith, swi
 import { Board, BoardService, BoardUserService, State, StateService, UserRole, UserService } from '../../../../api';
 import { UserInviteService } from '../../../../api/board/user-invite/user-invite.service';
 import { UserInvite } from '../../../../api/board/user-invite/dto/user-invite.dto';
+import { AuthService } from '@auth0/auth0-angular';
 
 @Component({
   selector: 'app-board-settings-page',
@@ -17,6 +18,8 @@ export class BoardSettingsPageComponent {
   public readonly UserRole = UserRole;
 
   public readonly newStateTitle = this.fb.control(undefined!, { nonNullable: true, validators: [Validators.minLength(3), Validators.required] });
+
+  public readonly currentUser$ = this.auth.user$;
 
   public readonly inviteUserForm = this.fb.group({
     email: this.fb.control<string>('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
@@ -133,5 +136,6 @@ export class BoardSettingsPageComponent {
     private readonly boardUserService: BoardUserService,
     private readonly userService: UserService,
     private readonly userInviteService: UserInviteService,
+    private readonly auth: AuthService,
   ) { }
 }
