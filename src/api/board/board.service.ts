@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject, map, merge, mergeMap, scan, share, take } from 'rxjs';
+import { Observable, Subject, map, merge, mergeMap, scan, share, take, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { Action } from '../action';
 import { CacheCrud } from '../cache-crud';
@@ -88,16 +88,16 @@ export class BoardService {
           return {
             ...state,
             data: {
-              ...(state.loaded ? state.data : {}),
-              ...action.data.reduce((acc: any, current: any) => ({
+              ...state.data,
+              ...action.data.reduce((acc: any, board: Board) => ({
                 ...acc,
-                [current.id]: {
+                [board.id]: {
                   loading: false,
                   loaded: true,
                   creating: false,
                   updating: false,
                   deleting: false,
-                  data: current,
+                  data: board,
                 },
               }), {}),
             },
@@ -108,13 +108,10 @@ export class BoardService {
           return {
             ...state,
             data: {
-              ...(state.loaded ? state.data : {}),
+              ...state.data,
               [action.data]: {
-                ...(state.loaded ? state.data : {})[action.data],
+                ...state.data?.[action.data],
                 loading: true,
-                updating: false,
-                creating: false,
-                deleting: false,
               },
             },
           };
@@ -122,9 +119,9 @@ export class BoardService {
           return {
             ...state,
             data: {
-              ...(state.loaded ? state.data : {}),
+              ...state.data,
               [action.data.id]: {
-                ...(state.loaded ? state.data : {})[action.data.id],
+                ...state.data?.[action.data.id],
                 loading: false,
                 loaded: true,
                 data: action.data,
@@ -221,12 +218,7 @@ export class BoardService {
   findOne(id: Board['id']): Observable<CacheCrud<Board> | undefined> {
     setTimeout(() => this.findOne_.next(id), 0);
     return this.state$.pipe(
-      map(state => {
-        if (!state.loaded)
-          return undefined;
-        return state.data[id];
-      }),
-      share(),
+      map(state => state.data?.[id]),
     );
   }
 
