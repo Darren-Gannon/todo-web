@@ -44,7 +44,14 @@ mat-drawer-container {
 
         .notification-link {
             display: flex;
+            @extend .padding-md-top;
+            @extend .padding-md-bottom;
             align-items: center;
+
+            &.pad {
+                @extend .padding-lg-left;
+                @extend .padding-lg-right;
+            }
         }
     }
 }

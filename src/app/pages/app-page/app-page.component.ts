@@ -4,6 +4,7 @@ import { interval, map, share, startWith, switchMap, timer } from 'rxjs';
 import { BoardService } from '../../../api';
 import { Notification, NotificationService, NotificationState } from '../../../api/notification';
 import { NotificationType } from '../../../api/notification/dto/notification-type.enum';
+import { UserInviteService } from 'src/api/board/user-invite/user-invite.service';
 
 @Component({
   selector: 'app-app-page',
@@ -24,14 +25,17 @@ export class AppPageComponent {
     map(notifications => Object.values(notifications.data).reduce((acc, notification) => !notification.data.read ? ++acc : acc, 0)),
   );
 
+  public readonly userInvites$ = this.userInviteService.findAllForUser();
+
   sortNotifications(notifications: NotificationState[]): NotificationState[] {
     return notifications.sort((a, b) => new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime());
   }
 
   constructor(
-    public readonly authService: AuthService,
-    public readonly boardService: BoardService,
-    public readonly notificationService: NotificationService,
+    private readonly authService: AuthService,
+    private readonly boardService: BoardService,
+    private readonly notificationService: NotificationService,
+    private readonly userInviteService: UserInviteService,
   ) { }
 
   public markAsRead(notification: Notification) {
@@ -48,5 +52,9 @@ export class AppPageComponent {
       default: 
         throw new Error(`Invalid notification type: '${ notification.type }'`)
     }
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }
