@@ -154,7 +154,7 @@
                                                 </mat-menu>
                                             </span>
                                             <div class="trash-can">
-                                                <button mat-icon-button color="warn">
+                                                <button mat-icon-button color="warn" (click)="deleteBoardUser(board.data, user.data)">
                                                     <ng-container *ngIf="vm.currentUser?.sub != user.data.userId; else leaveTmpl">
                                                         <mat-icon>delete</mat-icon>
                                                     </ng-container>

@@ -17,14 +17,17 @@ export class BoardUserService {
   ) { }
 
   private readonly findAllForBoard_ = new Subject<string>();
-  
   private readonly updateUser_ = new Subject<{ boardId: string, userId: string, user: Pick<BoardUser, 'role'> }>();
+  private readonly removeUser_ = new Subject<{ boardId: string, userId: string }>();
 
   private readonly findAllForBoard$: Observable<ActionFindAllForBoard> = this.findAllForBoard_.asObservable().pipe(
     map(boardId => ({ type: 'findAllForBoard', data: { boardId } })),
   );
   private readonly updateUser$: Observable<ActionUpdateUser> = this.updateUser_.asObservable().pipe(
     map(({ boardId, userId, user }) => ({ type: 'updateUser', data: { boardId, userId, user } })),
+  );
+  private readonly removeUser$: Observable<ActionRemoveUser> = this.removeUser_.asObservable().pipe(
+    map(({ boardId, userId }) => ({ type: 'removeUser', data: { boardId, userId } })),
   );
 
   private readonly foundAllForBoard$: Observable<ActionFoundAllForBoard> = this.findAllForBoard$.pipe(
@@ -43,12 +46,22 @@ export class BoardUserService {
     map(([{ boardId, userId, user }, updatedUser]) => ({ type: 'updatedUser', data: { boardId, userId, user: updatedUser } }) satisfies ActionUpdatedUser),
     share(),
   );
+  private readonly removedUser$: Observable<ActionRemovedUser> = this.removeUser$.pipe(
+    switchMap(({ data: { boardId, userId } }) => combineLatest([
+      of({ boardId, userId }),
+      this.http.delete<BoardUser>(`${ this.config.apiUrl }/board/${ boardId }/user/${ userId }`),
+    ])),
+    map(([{ boardId, userId }, removedUser]) => ({ type: 'removedUser', data: { boardId, userId } }) satisfies ActionRemovedUser),
+    share(),
+  );
 
   private readonly state$: Observable<BoardUserState> = merge(
     this.findAllForBoard$,
     this.updateUser$,
+    this.removeUser$,
     this.foundAllForBoard$,
     this.updatedUser$,
+    this.removedUser$,
   ).pipe(
     scan((state, action) => {
       switch (action.type) {
@@ -92,6 +105,32 @@ export class BoardUserService {
                 },
                 loaded: true,
                 loading: false,
+              },
+            }
+          };
+        case 'removeUser':
+          return {
+            ...state,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                updating: false,
+                loaded: false,
+                loading: false,
+                data: {
+                  ...state.data?.[action.data.boardId]?.data,
+                  [action.data.userId]: {
+                    creating: false,
+                    loaded: false,
+                    loading: false,
+                    data: state.data?.[action.data.boardId]?.data?.[action.data.userId].data!,
+                    updating: false,
+                    ...state.data?.[action.data.boardId]?.data?.[action.data.userId],
+                    deleting: true,
+                  },
+                },
               },
             }
           };
@@ -152,6 +191,29 @@ export class BoardUserService {
               },
             }
           };
+        case 'removedUser':
+          return {
+            ...state,
+            data: {
+              ...state.data,
+              [action.data.boardId]: {
+                creating: false,
+                deleting: false,
+                updating: false,
+                loaded: false,
+                loading: false,
+                data: Object.entries(state.data?.[action.data.boardId]?.data ?? {}).reduce((acc, [boardUserId, boardUser]) => {
+                  if (boardUserId === action.data.userId) {
+                    return acc;
+                  }
+                  return {
+                    ...acc,
+                    [boardUserId]: boardUser,
+                  };
+                }, { } as { [boardUserId: string]: CacheCrud<BoardUser> }),
+              },
+            }
+          };
         default:
           return state;
       }
@@ -183,7 +245,14 @@ export class BoardUserService {
       take(1),
     );
   }
-  // TODO Add Remove User
+
+  public removeUser(boardId: string, userId: string): Observable<BoardUser | undefined> {
+    setTimeout(() => this.removeUser_.next({ boardId, userId }), 0);
+    return this.state$.pipe(
+      map(state => state.data?.[boardId]?.data?.[userId]?.data),
+      take(1),
+    );
+  }
 }
 
 type State = { [boardId: Board['id']]: StateItem };
@@ -196,3 +265,5 @@ type ActionFindAllForBoard = Action<'findAllForBoard', { boardId: string }>;
 type ActionFoundAllForBoard = Action<'foundAllForBoard', { boardId: string, users: BoardUser[] }>;
 type ActionUpdateUser = Action<'updateUser', { boardId: string, userId: string, user: Pick<BoardUser, 'role'> }>;
 type ActionUpdatedUser = Action<'updatedUser', { boardId: string, userId: string, user: BoardUser }>;
+type ActionRemoveUser = Action<'removeUser', { boardId: string, userId: string }>;
+type ActionRemovedUser = Action<'removedUser', { boardId: string, userId: string }>;

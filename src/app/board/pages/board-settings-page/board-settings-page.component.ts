@@ -133,6 +133,10 @@ export class BoardSettingsPageComponent {
     this.userInviteService.removeForBoard(board.id, invite.id).subscribe()
   }
 
+  deleteBoardUser(board: Board, user: BoardUser) {
+    this.boardUserService.removeUser(board.id, user.id).subscribe()
+  }
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
