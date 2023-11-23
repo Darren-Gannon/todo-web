@@ -4,3 +4,29 @@
     @extend .margin-md-top;
     @extend .container-sm;
 }
+
+#create-board-container {
+    display: flex;
+    width: 100%;
+    @extend .gap-sm;
+    @extend .padding-md-left;
+    @extend .padding-md-right;
+    @extend .padding-sm-bottom;
+
+    & > button[type="submit"] {
+        flex-grow: 1;
+    }
+}
+
+#creating-board-container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+#board-title-container {
+    display: flex;
+    flex-direction: column;
+    @extend .gap-sm;
+    width: 100%;
+}

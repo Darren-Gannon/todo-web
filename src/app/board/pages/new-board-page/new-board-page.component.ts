@@ -49,20 +49,6 @@ export class NewBoardPageComponent {
   
   public submitBoardStateEmitter = new Subject<'validating' | 'creating-board' | 'creating-states' | 'done'>();
   public readonly submitBoardState$ = this.submitBoardStateEmitter.asObservable();
-  public readonly submitBoardStatePerc$ = this.submitBoardState$.pipe(
-    map(state => {
-      switch(state) {
-        case 'validating': 
-          return 1;
-        case 'creating-board': 
-          return 33;
-        case 'done': 
-          return 100;
-        default: 
-          return 0;
-      }
-    })
-  );
 
   constructor(
     private readonly fb: FormBuilder,

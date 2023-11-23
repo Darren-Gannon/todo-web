@@ -1,35 +1,33 @@
 <ng-container *ngIf="{
-    submitBoardStatePerc: submitBoardStatePerc$ | async,
     submitBoard: submitBoard$ | async,
+    submitBoardState: submitBoardState$ | async,
 } as vm">
-
     <form id="board-form" (ngSubmit)="boardForm.valid && submitBoardEmitter.next(boardForm.value)"
         [formGroup]="boardForm">
         <mat-card>
             <mat-card-content>
                 <div id="board-title-container">
                     <mat-form-field>
-                        <mat-label>Project Name</mat-label>
+                        <mat-label>Board Name</mat-label>
                         <input matInput formControlName="title">
                     </mat-form-field>
                 </div>
             </mat-card-content>
 
             <mat-card-actions>
-                <div id="create-board-container">
-                    <ng-container *ngIf="!vm.submitBoardStatePerc; else submitBoardStateTmpl">
+                <ng-container *ngIf="!vm.submitBoardState; else submitBoardStateTmpl">
+                    <div id="create-board-container">
                         <button mat-stroked-button type="button" color="warn" routerLink="..">Cancel</button>
                         <button mat-raised-button type="submit" color="accent">Create</button>
-                    
-                    </ng-container>
-                    <ng-template #submitBoardStateTmpl>
-                        
+                    </div>
+                </ng-container>
+                <ng-template #submitBoardStateTmpl>
+                    <div id="creating-board-container">
                         <mat-spinner
-                            [mode]="[1, 100].includes(vm.submitBoardStatePerc!)  ? 'indeterminate' : 'determinate'"
-                            diameter="50" [value]="vm.submitBoardStatePerc"></mat-spinner>
-
-                    </ng-template>
-                </div>
+                            mode="indeterminate"
+                            diameter="50"></mat-spinner>
+                    </div>
+                </ng-template>
             </mat-card-actions>
         </mat-card>
     </form>
