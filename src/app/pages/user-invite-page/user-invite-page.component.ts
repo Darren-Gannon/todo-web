@@ -3,6 +3,7 @@ import { UserInviteService } from '../../../api/board/user-invite/user-invite.se
 import { ActivatedRoute, Router } from '@angular/router';
 import { map, switchMap } from 'rxjs';
 import { UserInvite } from '../../../api/board/user-invite/dto/user-invite.dto';
+import { AuthService } from '@auth0/auth0-angular';
 
 @Component({
   selector: 'app-user-invite-page',
@@ -23,11 +24,16 @@ export class UserInvitePageComponent {
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly userInviteService: UserInviteService,
+    private readonly auth: AuthService,
   ) { }
 
   acceptInvite(invite: UserInvite) {
     this.userInviteService.approveForUser(invite.id).pipe(
-      switchMap(() => this.router.navigate(['/app/board', invite.boardId]))
+      switchMap(() => this.auth.loginWithRedirect({ 
+        appState: { 
+          target: `/app/board/${ invite.boardId }` 
+        } 
+      }))
     ).subscribe()
   }
 
