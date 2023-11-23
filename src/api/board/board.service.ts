@@ -92,11 +92,7 @@ export class BoardService {
               ...action.data.reduce((acc: any, board: Board) => ({
                 ...acc,
                 [board.id]: {
-                  loading: false,
                   loaded: true,
-                  creating: false,
-                  updating: false,
-                  deleting: false,
                   data: board,
                 },
               }), {}),
@@ -104,7 +100,7 @@ export class BoardService {
             loading: false,
             loaded: true,
           };
-        case 'findOne':
+        case 'findOne':          
           return {
             ...state,
             data: {
@@ -132,13 +128,10 @@ export class BoardService {
           return {
             ...state,
             data: {
-              ...(state.loaded ? state.data : {}),
+              ...state?.data,
               [action.data.id]: {
                 loading: true,
-                loaded: false,
                 creating: true,
-                updating: false,
-                deleting: false,
                 data: action.data,
               },
             },
@@ -147,9 +140,9 @@ export class BoardService {
           return {
             ...state,
             data: {
-              ...(state.loaded ? state.data : {}),
+              ...state.data,
               [action.data.id]: {
-                ...(state.loaded ? state.data : {})?.[action.data.id],
+                ...state.data?.[action.data.id],
                 loading: false,
                 loaded: true,
                 data: action.data,
@@ -160,9 +153,9 @@ export class BoardService {
           return {
             ...state,
             data: {
-              ...(state.loaded ? state.data : {}),
+              ...state.data,
               [action.data.id]: {
-                ...(state.loaded ? state.data : {})[action.data.id],
+                ...state.data?.[action.data.id],
                 updating: true,
                 data: action.data,
               },
@@ -172,9 +165,9 @@ export class BoardService {
           return {
             ...state,
             data: {
-              ...(state.loaded ? state.data : {}),
+              ...state.data,
               [action.data.id]: {
-                ...(state.loaded ? state.data : {})[action.data.id],
+                ...state.data?.[action.data.id],
                 updating: false,
                 data: action.data,
               },
@@ -184,25 +177,20 @@ export class BoardService {
           return {
             ...state,
             data: {
-              ...(state.loaded ? state.data : {}),
+              ...state.data,
               [action.data]: {
-                ...(state.loaded ? state.data : {})?.[action.data],
+                ...state.data?.[action.data],
                 deleting: true,
               },
             },
           };
         case 'removed':
-          delete (state.loaded ? state.data : {})[action.data.id];
+          delete state.data?.[action.data.id];
           return state;
         default:
           return state;
       }
     }, ({
-      loading: false,
-      loaded: false,
-      creating: false,
-      deleting: false,
-      updating: false,
       data: {},
     }) as BoardState),
     share(),
