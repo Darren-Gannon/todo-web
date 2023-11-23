@@ -25,6 +25,7 @@ import { NotificationPageComponent } from './pages/notification-page/notificatio
 import { MatBadgeModule } from '@angular/material/badge';
 import { UserInvitePageComponent } from './pages/user-invite-page/user-invite-page.component';
 import { environment } from 'src/environments/environment';
+import { UserInviteListPageComponent } from './pages/user-invite-list-page/user-invite-list-page.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,7 @@ import { environment } from 'src/environments/environment';
     NotificationListPageComponent,
     NotificationPageComponent,
     UserInvitePageComponent,
+    UserInviteListPageComponent,
   ],
   imports: [
     BrowserModule,

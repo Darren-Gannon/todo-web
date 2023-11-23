@@ -1,0 +1,17 @@
+<ng-container *ngIf="{
+    userInvites: userInvites$ | async,
+} as vm">
+    <ng-container *ngIf="vm.userInvites as userInvites">
+        <div id="invites-container">
+            <mat-card>
+                <mat-action-list>
+                    <ng-container *ngFor="let invite of userInvites">
+                        <a style="text-decoration: none; color: unset;" [routerLink]="invite.id">
+                            <mat-list-item>Invite to Board "{{ invite.boardTitle }}"</mat-list-item>
+                        </a>
+                    </ng-container>
+                </mat-action-list>
+            </mat-card>
+        </div>
+    </ng-container>
+</ng-container>

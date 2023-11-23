@@ -8,6 +8,7 @@ import { IndexPageComponent } from './pages/index-page/index-page.component';
 import { NotificationListPageComponent } from './pages/notification-list-page/notification-list-page.component';
 import { NotificationPageComponent } from './pages/notification-page/notification-page.component';
 import { UserInvitePageComponent } from './pages/user-invite-page/user-invite-page.component';
+import { UserInviteListPageComponent } from './pages/user-invite-list-page/user-invite-list-page.component';
 
 @Injectable({
   providedIn: 'root'
@@ -51,6 +52,7 @@ const routes: Routes = [
       { path: '', pathMatch: 'full', component: NotificationListPageComponent },
     ] },
     { path: 'invite', children: [
+      { path: '', component: UserInviteListPageComponent },
       { path: ':invite_id', component: UserInvitePageComponent },
     ] },
     { path: 'board', loadChildren: () => import('./board/board.module').then(m => m.BoardModule) },

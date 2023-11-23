@@ -1,0 +1,6 @@
+@import '/src/import-styles.scss';
+
+#invites-container {
+    @extend .container-sm;
+    @extend .padding-md-top;
+}
