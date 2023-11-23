@@ -32,13 +32,19 @@ export class BoardSettingsPageComponent {
     share(),
   );
 
+  public readonly userInvites$ = this.boardId$.pipe(
+    switchMap(id => this.userInviteService.findAllForBoard(id)),
+  );
+
   public readonly users$ = combineLatest([
     this.boardUsers$,
+    this.userInvites$,
     this.userService.findAll(),
   ]).pipe(
-    map(([boardUsers, users]) => {
+    map(([boardUsers, userInvites, users]) => {
       const boardUsersIds = boardUsers.map(({ userId }) => userId);
-      return users.filter(user => !boardUsersIds.includes(user.user_id));
+      const userInvitesEmails = Object.values(userInvites??{}).map(invite => invite.data?.email);
+      return users.filter(user => !boardUsersIds.includes(user.user_id)).filter(user => !userInvitesEmails.includes(user.email));
     }),
     shareReplay(1),
   );
@@ -71,10 +77,6 @@ export class BoardSettingsPageComponent {
     map(states => states?.data),
     map(states => Object.values(states ?? {}).map(state => state.data).map(state => this.fb.control(state?.title, { nonNullable: true, validators: [Validators.minLength(3), Validators.required] }))),
     startWith([]),
-  );
-
-  public readonly userInvites$ = this.boardId$.pipe(
-    switchMap(id => this.userInviteService.findAllForBoard(id)),
   );
 
   public readonly inviteUserEmitter = new Subject<{
