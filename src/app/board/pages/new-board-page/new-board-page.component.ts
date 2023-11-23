@@ -3,6 +3,7 @@ import { FormArray, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, combineLatest, delay, filter, map, of, switchMap, tap } from 'rxjs';
 import { BoardService, StateService, User } from '../../../../api';
+import { AuthService } from '@auth0/auth0-angular';
 
 @Component({
   selector: 'app-new-board-page',
@@ -13,31 +14,8 @@ export class NewBoardPageComponent {
 
   public readonly boardForm = this.fb.group({
     title: this.fb.control('', { nonNullable: true, validators: [Validators.minLength(3), Validators.required] }),
-    states: this.fb.array<string>([]),
     users: this.fb.array<User>([]),
   });
-
-  public readonly newStateCtrl = this.fb.control<string>(undefined!, { nonNullable: true, validators: [Validators.minLength(3), Validators.required] });
-
-  public get states() {
-    return this.boardForm.get('states') as FormArray;
-  }
-
-  public readonly addStateEmitter = new Subject<void>();
-  public readonly addState$ = this.addStateEmitter.asObservable().pipe(
-    map(() => {
-      let ctrl = this.fb.control<string>(undefined!, { nonNullable: true, validators: [Validators.minLength(3)] });
-      this.states.push(ctrl);
-      ctrl.reset();
-    })
-  );
-
-  public readonly removeStateEmitter = new Subject<number>();
-  public readonly removeState$ = this.removeStateEmitter.asObservable().pipe(
-    map(index => {
-      this.states.removeAt(index);
-    })
-  );
 
   public readonly submitBoardEmitter = new Subject<Partial<{ 
     title: string;
@@ -54,19 +32,19 @@ export class NewBoardPageComponent {
       users: form.users?.filter(user => !!user) as User[],
     })),
     tap(() => this.submitBoardStateEmitter.next('creating-board')),
-    switchMap(form => {
-      return combineLatest([this.boardService.create({ title: form.title }), of(form)])
-    }),
-    tap(() => this.submitBoardStateEmitter.next('creating-states')),
-    switchMap(([board, form]) => combineLatest([
-      of(board),
-      this.stateService.createMany(board.id, form.states.map(stateName => ({
-        title: stateName
-      }))),
-    ])),
+    switchMap(form => this.boardService.create({ title: form.title })),
     tap(() => this.submitBoardStateEmitter.next('done')),
     delay(1500),
-    switchMap(([board]) => this.router.navigate(['..', board.id], { relativeTo: this.route })),
+    switchMap(board => {
+      return this.authService.getAccessTokenSilently().pipe(
+        map(() => board),
+      );
+    }),
+    switchMap(board => this.authService.loginWithRedirect({
+      appState: {
+        target: `app/board/${ board.id }`,
+      }
+    })),
   );
   
   public submitBoardStateEmitter = new Subject<'validating' | 'creating-board' | 'creating-states' | 'done'>();
@@ -78,8 +56,6 @@ export class NewBoardPageComponent {
           return 1;
         case 'creating-board': 
           return 33;
-        case 'creating-states': 
-          return 67;
         case 'done': 
           return 100;
         default: 
@@ -93,6 +69,6 @@ export class NewBoardPageComponent {
     private readonly router: Router,
     private readonly route: ActivatedRoute,
     private readonly boardService: BoardService,
-    private readonly stateService: StateService,
+    private readonly authService: AuthService,
   ) { }
 }
