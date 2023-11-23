@@ -11,7 +11,8 @@ import { CacheCrud } from 'src/api/cache-crud';
 })
 export class TaskDialogComponent implements OnInit {
 
-  public confirm = confirm;
+  public readonly Object = Object;
+  public readonly confirm = confirm;
 
   public readonly taskForm = this.fb.group({
     title: this.fb.control('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] }),

@@ -9,7 +9,11 @@
             <mat-form-field id="task-status">
                 <mat-label>Status</mat-label>
                 <mat-select formControlName="stateId">
-                    <mat-option *ngFor="let state in data.states" [value]="state.data.id"> {{ state.data.title }} </mat-option>
+                    <ng-container *ngFor="let state of Object.values(data.states)">
+                        <ng-container *ngIf="state.loaded">
+                            <mat-option [value]="state.data.id"> {{ state.data.title }} </mat-option>
+                        </ng-container>
+                    </ng-container>
                 </mat-select>
             </mat-form-field>
         </div>
