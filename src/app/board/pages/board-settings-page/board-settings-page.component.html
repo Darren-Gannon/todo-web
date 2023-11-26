@@ -55,9 +55,8 @@
                                                 <ng-container *ngIf="!stateVm.editing; else editStateTmpl">
                                                     <mat-list-item role="listitem">
                                                         <div class="state-list-item">
-                                                            <span class="state-list-item-title">{{ state.data!.title
-                                                                }}</span>
-                                                            <ng-container *ngIf="!state.loading; else loadingTmpl">
+                                                            <ng-container *ngIf="state.loaded">
+                                                                <span class="state-list-item-title">{{ state.data.title }}</span>
                                                                 <div class="state-list-item-actions">
                                                                     <button mat-icon-button color="accent"
                                                                         (click)="stateVm.editing = true">
@@ -69,6 +68,7 @@
                                                                     </button>
                                                                 </div>
                                                             </ng-container>
+                                                            <ng-container *ngIf="state.loading" [ngTemplateOutlet]="loadingTmpl"></ng-container>
                                                         </div>
                                                     </mat-list-item>
                                                 </ng-container>
